@@ -1,0 +1,15 @@
+Primary Color: Olive Drab (#4A5D23 or similar)  
+A muted, military green evokes the rugged, wartime feel of tanks and ground forces, a key element of War Thunder. It’s versatile for backgrounds or accents.
+
+Secondary Color: Gunmetal Gray (#2A3439)  
+This dark, steely gray ties into the metallic aesthetic of tanks, planes, and ships, grounding the design in the game’s industrial vibe. Great for headers, text, or UI elements.
+
+Accent Color: Burnt Orange (#CC5500)  
+A bold, fiery orange can represent explosions, engine heat, or dynamic action, adding energy to buttons, highlights, or call-to-action elements.
+
+Neutral Base: Off-White or Light Gray (#E8ECEF)  
+A clean, slightly weathered off-white or light gray keeps the site readable and balanced, mimicking aged paper or a tactical map. Ideal for backgrounds or text contrast.
+
+Highlight/Support Color: Deep Blue (#1A3C5A)  
+Inspired by naval warfare and aviation skies, a rich blue can subtly nod to the game’s air and sea components, working well for links or secondary accents.
+
