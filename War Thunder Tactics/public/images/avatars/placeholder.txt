@@ -1,0 +1,11 @@
+Replace this file with actual avatar images (.jpg or .png) for:
+
+- default.jpg (default avatar)
+- commander1.jpg
+- commander2.jpg
+- commander3.jpg
+- commander4.jpg
+- commander5.jpg
+
+Ideal image dimensions: 200x200px for avatars (square format)
+Use consistent style for all avatars 

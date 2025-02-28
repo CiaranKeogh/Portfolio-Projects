@@ -1,0 +1,34 @@
+Replace this file with actual UI icon images (.svg preferred, or .png) for:
+
+- tactics/
+  - flanking.svg
+  - ambush.svg
+  - rush.svg
+  - defense.svg
+  - sniping.svg
+
+- status/
+  - success.svg
+  - warning.svg
+  - error.svg
+  - info.svg
+
+- navigation/
+  - home.svg
+  - maps.svg
+  - tactics.svg
+  - vehicles.svg
+  - profile.svg
+  - settings.svg
+
+- actions/
+  - add.svg
+  - edit.svg
+  - delete.svg
+  - save.svg
+  - share.svg
+  - like.svg
+  - comment.svg
+
+Icons should be consistent in style and preferably use SVG format for scalability
+Recommended size: 24x24px for navigation and action icons 

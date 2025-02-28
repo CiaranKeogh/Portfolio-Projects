@@ -1,0 +1,10 @@
+Replace this file with actual map thumbnail images (.jpg or .png) for:
+
+- rhine.jpg
+- sinai.jpg 
+- karelia.jpg
+- maginot.jpg
+- berlin.jpg
+- kursk.jpg
+
+Ideal image dimensions: 800x500px 
