@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-placeholders": "node scripts/generate-placeholders-simple.js"
+    "generate-placeholders": "node scripts/generate-placeholders-simple.js",
+    "dev-watch": "node scripts/dev-watch.js"
   },
   "keywords": [
     "war thunder",
