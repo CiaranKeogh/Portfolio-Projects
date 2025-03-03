@@ -1,284 +1,328 @@
 const fs = require('fs');
 const path = require('path');
 
-// Base directory for images
-const baseDir = path.join(process.cwd(), 'public', 'images');
-
-// Ensure directories exist
+// Function to ensure directory exists
 function ensureDirectoryExists(dirPath) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
-    console.log(`Created directory: ${dirPath}`);
   }
 }
 
-// Generate a placeholder HTML file that displays information about the missing image
-function generatePlaceholderHtml(filePath, width, height, label, bgColor = '#333333', textColor = '#ffffff') {
+// Function to create a placeholder HTML file
+function createPlaceholderHtml(filePath, title, description, dimensions) {
   const htmlContent = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Image Placeholder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title} - Placeholder</title>
   <style>
     body {
-      margin: 0;
-      padding: 0;
+      font-family: sans-serif;
+      background-color: #f0f0f0;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: ${width}px;
-      height: ${height}px;
-      background-color: ${bgColor};
-      color: ${textColor};
-      font-family: Arial, sans-serif;
-      overflow: hidden;
+      height: 100vh;
+      margin: 0;
     }
-    .container {
+    .placeholder {
+      width: ${dimensions.width}px;
+      height: ${dimensions.height}px;
+      background-color: #333;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
       padding: 20px;
+      box-sizing: border-box;
     }
-    .label {
-      font-size: ${Math.floor(width / 20)}px;
-      font-weight: bold;
-      margin-bottom: 10px;
+    h1 {
+      margin: 0 0 20px 0;
     }
-    .dimensions {
-      font-size: ${Math.floor(width / 30)}px;
-    }
-    .border {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      right: 2px;
-      bottom: 2px;
-      border: 4px solid #555555;
-      pointer-events: none;
-    }
-    .info {
-      margin-top: 20px;
-      font-size: 14px;
-      opacity: 0.8;
+    p {
+      margin: 0;
     }
   </style>
 </head>
 <body>
-  <div class="border"></div>
-  <div class="container">
-    <div class="label">${label}</div>
-    <div class="dimensions">${width}x${height}</div>
-    <div class="info">Replace with actual image</div>
+  <div class="placeholder">
+    <h1>${title}</h1>
+    <p>${description}</p>
+    <p>${dimensions.width}x${dimensions.height}</p>
   </div>
 </body>
 </html>
   `;
-  
-  // Create a text file with the .html extension next to where the image would be
-  const htmlFilePath = filePath.replace(/\.(jpg|png)$/, '.html');
-  
-  ensureDirectoryExists(path.dirname(htmlFilePath));
-  fs.writeFileSync(htmlFilePath, htmlContent);
-  console.log(`Generated HTML placeholder: ${htmlFilePath}`);
-  
-  // Also create an empty file with the original name so that file checks don't fail
-  fs.writeFileSync(filePath, 'PLACEHOLDER - Replace with actual image');
-  console.log(`Generated empty placeholder: ${filePath}`);
+
+  fs.writeFileSync(filePath, htmlContent);
+  console.log(`Created placeholder HTML: ${filePath}`);
 }
 
-// Generate SVG icon
-function generateSvgIcon(filePath, name) {
-  const svgContent = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <rect width="24" height="24" fill="#333333" />
-    <rect x="2" y="2" width="20" height="20" fill="#444444" stroke="#666666" stroke-width="1" />
-    <text x="12" y="12" font-family="Arial" font-size="5" text-anchor="middle" dominant-baseline="middle" fill="white">${name}</text>
-    <text x="12" y="18" font-family="Arial" font-size="3" text-anchor="middle" dominant-baseline="middle" fill="white">24x24</text>
-  </svg>`;
-  
-  ensureDirectoryExists(path.dirname(filePath));
-  fs.writeFileSync(filePath, svgContent);
-  console.log(`Generated SVG: ${filePath}`);
+// Function to create an empty image file
+function createEmptyImageFile(filePath) {
+  // Create an empty file
+  fs.writeFileSync(filePath, '');
+  console.log(`Created empty image file: ${filePath}`);
 }
 
-// Create Map Thumbnails
+// Maps
 const mapThumbnails = [
-  { name: 'rhine.jpg', label: 'Advance to the Rhine' },
-  { name: 'sinai.jpg', label: 'Sinai Desert' },
-  { name: 'karelia.jpg', label: 'Karelia' },
-  { name: 'maginot.jpg', label: 'Maginot Line' },
-  { name: 'berlin.jpg', label: 'Berlin' },
-  { name: 'kursk.jpg', label: 'Kursk' },
-  { name: 'eastern_europe.jpg', label: 'Eastern Europe' }
+  'rhine.jpg',
+  'sinai.jpg',
+  'karelia.jpg',
+  'maginot.jpg',
+  'berlin.jpg',
+  'kursk.jpg',
+  'eastern_europe.jpg',
+  'fulda.jpg',
+  'jungle.jpg'
 ];
 
-mapThumbnails.forEach(map => {
-  const thumbnailPath = path.join(baseDir, 'maps', 'thumbnails', map.name);
-  generatePlaceholderHtml(thumbnailPath, 800, 500, `Thumbnail: ${map.label}`, '#2b4c7d', '#ffffff');
+// Add additional maps (could be different) - these are the full size versions
+const additionalMapImages = [
+  'rhine_full.jpg',
+  'sinai_full.jpg',
+  'karelia_full.jpg', 
+  'maginot_full.jpg',
+  'berlin_full.jpg',
+  'kursk_full.jpg',
+  'eastern_europe_full.jpg',
+  'fulda_full.jpg',
+  'jungle_full.jpg',
+  'stalingrad.jpg', // Additional map not in thumbnails
+  'hero-map-background.jpg' // Background for hero section
+];
+
+// Power position images
+const powerPositionImages = [
+  'kursk-hill-203-1.jpg',
+  'kursk-hill-203-2.jpg',
+  'stalingrad-factory-1.jpg',
+  'stalingrad-factory-2.jpg',
+  'fulda-ridge-1.jpg',
+  'fulda-ridge-2.jpg',
+  'jungle-island-1.jpg',
+  'jungle-island-2.jpg',
+  'sinai-ridge-1.jpg',
+  'sinai-ridge-2.jpg'
+];
+
+// Avatar images
+const avatarImages = [
+  'default.jpg',
+  'commander1.jpg',
+  'commander2.jpg',
+  'commander3.jpg',
+  'commander4.jpg',
+  'commander5.jpg',
+  'user1.jpg',
+  'user2.jpg',
+  'user3.jpg',
+  'user4.jpg',
+  'user5.jpg',
+  'user6.jpg',
+  'user7.jpg'
+];
+
+// Tank images
+const tankImages = [
+  't-34.jpg',
+  'tiger.jpg',
+  'sherman.jpg',
+  'is-2.jpg',
+  'panther.jpg',
+  'm26.jpg',
+  'leopard.jpg',
+  'abrams.jpg',
+  't-54.jpg',
+  't-90.jpg'
+];
+
+// Aircraft images
+const aircraftImages = [
+  'bf-109.jpg',
+  'spitfire.jpg',
+  'p-51.jpg',
+  'fw-190.jpg',
+  'il-2.jpg',
+  'yak-9.jpg',
+  'me-262.jpg',
+  'f-86.jpg',
+  'mig-15.jpg',
+  'f-4.jpg'
+];
+
+// Route images
+const routeImages = [
+  'rhine-bridge-rush.jpg',
+  'eastern-europe-south-flank.jpg',
+  'karelia-hill-bypass.jpg',
+  'poland-village-sweep.jpg'
+];
+
+// Icon files in SVG format
+const iconFiles = {
+  tactics: ['ambush.svg', 'defense.svg', 'flanking.svg', 'rush.svg', 'sniping.svg'],
+  status: ['error.svg', 'info.svg', 'success.svg', 'warning.svg'],
+  navigation: ['home.svg', 'maps.svg', 'profile.svg', 'settings.svg', 'tactics.svg', 'vehicles.svg'],
+  actions: ['add.svg', 'comment.svg', 'delete.svg', 'edit.svg', 'like.svg', 'save.svg', 'share.svg']
+};
+
+// Generate image placeholders
+function generateImagePlaceholders() {
+  // Map thumbnails
+  const thumbnailsDir = path.join('public', 'images', 'maps', 'thumbnails');
+  ensureDirectoryExists(thumbnailsDir);
   
-  // Also create full map image
-  const fullMapPath = path.join(baseDir, 'maps', map.name.replace('.jpg', '_full.jpg'));
-  generatePlaceholderHtml(fullMapPath, 1600, 1000, `Full Map: ${map.label}`, '#2b4c7d', '#ffffff');
+  mapThumbnails.forEach(filename => {
+    const htmlPath = path.join(thumbnailsDir, `${path.basename(filename, path.extname(filename))}.html`);
+    const imagePath = path.join(thumbnailsDir, filename);
+    
+    createPlaceholderHtml(
+      htmlPath,
+      `Map Thumbnail: ${filename}`,
+      'Replace with actual map thumbnail',
+      { width: 800, height: 500 }
+    );
+    
+    createEmptyImageFile(imagePath);
+  });
   
-  // Simple map image for references
-  const mapPath = path.join(baseDir, 'maps', map.name);
-  generatePlaceholderHtml(mapPath, 1200, 800, `Map: ${map.label}`, '#2b4c7d', '#ffffff');
-});
-
-// Create additional maps needed for positions
-const additionalMaps = [
-  { name: 'stalingrad.jpg', label: 'Stalingrad' },
-  { name: 'fulda.jpg', label: 'Fulda Gap' },
-  { name: 'jungle.jpg', label: 'Jungle' }
-];
-
-additionalMaps.forEach(map => {
-  const mapPath = path.join(baseDir, 'maps', map.name);
-  generatePlaceholderHtml(mapPath, 1200, 800, `Map: ${map.label}`, '#2b4c7d', '#ffffff');
-});
-
-// Create Power Position images
-const positionImages = [
-  { name: 'kursk-hill-203-1.jpg', label: 'Kursk: Hill 203 (View 1)' },
-  { name: 'kursk-hill-203-2.jpg', label: 'Kursk: Hill 203 (View 2)' },
-  { name: 'stalingrad-factory-1.jpg', label: 'Stalingrad: Factory (View 1)' },
-  { name: 'stalingrad-factory-2.jpg', label: 'Stalingrad: Factory (View 2)' },
-  { name: 'fulda-ridge-1.jpg', label: 'Fulda: Ridge (View 1)' },
-  { name: 'fulda-ridge-2.jpg', label: 'Fulda: Ridge (View 2)' },
-  { name: 'jungle-island-1.jpg', label: 'Jungle: Island (View 1)' },
-  { name: 'jungle-island-2.jpg', label: 'Jungle: Island (View 2)' },
-  { name: 'sinai-ridge-1.jpg', label: 'Sinai: Ridge (View 1)' },
-  { name: 'sinai-ridge-2.jpg', label: 'Sinai: Ridge (View 2)' }
-];
-
-positionImages.forEach(pos => {
-  const posPath = path.join(baseDir, 'positions', pos.name);
-  generatePlaceholderHtml(posPath, 600, 400, pos.label, '#4a6741', '#ffffff');
-});
-
-// Create Avatar images
-const avatars = [
-  { name: 'default.jpg', label: 'Default Avatar' },
-  { name: 'commander1.jpg', label: 'Commander 1' },
-  { name: 'commander2.jpg', label: 'Commander 2' },
-  { name: 'commander3.jpg', label: 'Commander 3' },
-  { name: 'commander4.jpg', label: 'Commander 4' },
-  { name: 'commander5.jpg', label: 'Commander 5' },
-  { name: 'user1.jpg', label: 'User 1' },
-  { name: 'user2.jpg', label: 'User 2' },
-  { name: 'user3.jpg', label: 'User 3' },
-  { name: 'user4.jpg', label: 'User 4' },
-  { name: 'user5.jpg', label: 'User 5' },
-  { name: 'user6.jpg', label: 'User 6' },
-  { name: 'user7.jpg', label: 'User 7' }
-];
-
-avatars.forEach(avatar => {
-  const avatarPath = path.join(baseDir, 'avatars', avatar.name);
-  generatePlaceholderHtml(avatarPath, 200, 200, avatar.label, '#603e1f', '#ffffff');
-});
-
-// Create Tank images
-const tanks = [
-  { name: 't-34.jpg', label: 'T-34' },
-  { name: 'tiger.jpg', label: 'Tiger' },
-  { name: 'sherman.jpg', label: 'Sherman' },
-  { name: 'panther.jpg', label: 'Panther' },
-  { name: 'is-2.jpg', label: 'IS-2' },
-  { name: 'm26.jpg', label: 'M26 Pershing' },
-  { name: 't-54.jpg', label: 'T-54' },
-  { name: 'leopard.jpg', label: 'Leopard' },
-  { name: 'abrams.jpg', label: 'Abrams' },
-  { name: 't-90.jpg', label: 'T-90' }
-];
-
-tanks.forEach(tank => {
-  const tankPath = path.join(baseDir, 'vehicles', 'tanks', tank.name);
-  generatePlaceholderHtml(tankPath, 400, 300, tank.label, '#3a3a3a', '#ffffff');
-});
-
-// Create Aircraft images
-const aircraft = [
-  { name: 'bf-109.jpg', label: 'Bf-109' },
-  { name: 'spitfire.jpg', label: 'Spitfire' },
-  { name: 'p-51.jpg', label: 'P-51 Mustang' },
-  { name: 'yak-9.jpg', label: 'Yak-9' },
-  { name: 'fw-190.jpg', label: 'Fw-190' },
-  { name: 'il-2.jpg', label: 'IL-2 Sturmovik' },
-  { name: 'me-262.jpg', label: 'Me-262' },
-  { name: 'mig-15.jpg', label: 'MiG-15' },
-  { name: 'f-86.jpg', label: 'F-86 Sabre' },
-  { name: 'f-4.jpg', label: 'F-4 Phantom' }
-];
-
-aircraft.forEach(ac => {
-  const acPath = path.join(baseDir, 'vehicles', 'aircraft', ac.name);
-  generatePlaceholderHtml(acPath, 400, 300, ac.label, '#3a3a3a', '#ffffff');
-});
-
-// Create Route images
-const routes = [
-  { name: 'eastern-europe-south-flank.jpg', label: 'Eastern Europe: South Flank' },
-  { name: 'rhine-bridge-rush.jpg', label: 'Rhine: Bridge Rush' },
-  { name: 'karelia-hill-bypass.jpg', label: 'Karelia: Hill Bypass' },
-  { name: 'poland-village-sweep.jpg', label: 'Poland: Village Sweep' }
-];
-
-routes.forEach(route => {
-  const routePath = path.join(baseDir, '../routes', route.name);
-  generatePlaceholderHtml(routePath, 800, 600, route.label, '#3d5c3a', '#ffffff');
-});
-
-// Create icon directories
-const iconDirs = [
-  'tactics',
-  'status',
-  'navigation',
-  'actions'
-];
-
-iconDirs.forEach(dir => {
-  ensureDirectoryExists(path.join(baseDir, 'icons', dir));
-});
-
-// Create icon files
-const icons = [
-  // Tactics
-  { dir: 'tactics', name: 'flanking.svg' },
-  { dir: 'tactics', name: 'ambush.svg' },
-  { dir: 'tactics', name: 'rush.svg' },
-  { dir: 'tactics', name: 'defense.svg' },
-  { dir: 'tactics', name: 'sniping.svg' },
+  // Map images
+  const mapsDir = path.join('public', 'images', 'maps');
+  ensureDirectoryExists(mapsDir);
   
-  // Status
-  { dir: 'status', name: 'success.svg' },
-  { dir: 'status', name: 'warning.svg' },
-  { dir: 'status', name: 'error.svg' },
-  { dir: 'status', name: 'info.svg' },
+  additionalMapImages.forEach(filename => {
+    const htmlPath = path.join(mapsDir, `${path.basename(filename, path.extname(filename))}.html`);
+    const imagePath = path.join(mapsDir, filename);
+    
+    createPlaceholderHtml(
+      htmlPath,
+      `Map Image: ${filename}`,
+      'Replace with actual map image',
+      { width: 1200, height: 800 }
+    );
+    
+    createEmptyImageFile(imagePath);
+  });
   
-  // Navigation
-  { dir: 'navigation', name: 'home.svg' },
-  { dir: 'navigation', name: 'maps.svg' },
-  { dir: 'navigation', name: 'tactics.svg' },
-  { dir: 'navigation', name: 'vehicles.svg' },
-  { dir: 'navigation', name: 'profile.svg' },
-  { dir: 'navigation', name: 'settings.svg' },
+  // Power position images
+  const positionsDir = path.join('public', 'images', 'positions');
+  ensureDirectoryExists(positionsDir);
   
-  // Actions
-  { dir: 'actions', name: 'add.svg' },
-  { dir: 'actions', name: 'edit.svg' },
-  { dir: 'actions', name: 'delete.svg' },
-  { dir: 'actions', name: 'save.svg' },
-  { dir: 'actions', name: 'share.svg' },
-  { dir: 'actions', name: 'like.svg' },
-  { dir: 'actions', name: 'comment.svg' }
-];
+  powerPositionImages.forEach(filename => {
+    const htmlPath = path.join(positionsDir, `${path.basename(filename, path.extname(filename))}.html`);
+    const imagePath = path.join(positionsDir, filename);
+    
+    createPlaceholderHtml(
+      htmlPath,
+      `Position Image: ${filename}`,
+      'Replace with actual position screenshot',
+      { width: 1000, height: 750 }
+    );
+    
+    createEmptyImageFile(imagePath);
+  });
+  
+  // Avatar images
+  const avatarsDir = path.join('public', 'images', 'avatars');
+  ensureDirectoryExists(avatarsDir);
+  
+  avatarImages.forEach(filename => {
+    const htmlPath = path.join(avatarsDir, `${path.basename(filename, path.extname(filename))}.html`);
+    const imagePath = path.join(avatarsDir, filename);
+    
+    createPlaceholderHtml(
+      htmlPath,
+      `Avatar: ${filename}`,
+      'Replace with actual avatar image',
+      { width: 200, height: 200 }
+    );
+    
+    createEmptyImageFile(imagePath);
+  });
+  
+  // Tank images
+  const tanksDir = path.join('public', 'images', 'vehicles', 'tanks');
+  ensureDirectoryExists(tanksDir);
+  
+  tankImages.forEach(filename => {
+    const htmlPath = path.join(tanksDir, `${path.basename(filename, path.extname(filename))}.html`);
+    const imagePath = path.join(tanksDir, filename);
+    
+    createPlaceholderHtml(
+      htmlPath,
+      `Tank: ${filename}`,
+      'Replace with actual tank image',
+      { width: 400, height: 300 }
+    );
+    
+    createEmptyImageFile(imagePath);
+  });
+  
+  // Aircraft images
+  const aircraftDir = path.join('public', 'images', 'vehicles', 'aircraft');
+  ensureDirectoryExists(aircraftDir);
+  
+  aircraftImages.forEach(filename => {
+    const htmlPath = path.join(aircraftDir, `${path.basename(filename, path.extname(filename))}.html`);
+    const imagePath = path.join(aircraftDir, filename);
+    
+    createPlaceholderHtml(
+      htmlPath,
+      `Aircraft: ${filename}`,
+      'Replace with actual aircraft image',
+      { width: 400, height: 300 }
+    );
+    
+    createEmptyImageFile(imagePath);
+  });
+  
+  // Route images
+  const routesDir = path.join('public', 'routes');
+  ensureDirectoryExists(routesDir);
+  
+  routeImages.forEach(filename => {
+    const htmlPath = path.join(routesDir, `${path.basename(filename, path.extname(filename))}.html`);
+    const imagePath = path.join(routesDir, filename);
+    
+    createPlaceholderHtml(
+      htmlPath,
+      `Route: ${filename}`,
+      'Replace with actual route image',
+      { width: 1200, height: 800 }
+    );
+    
+    createEmptyImageFile(imagePath);
+  });
+  
+  // Icons
+  for (const [category, icons] of Object.entries(iconFiles)) {
+    const iconsDir = path.join('public', 'images', 'icons', category);
+    ensureDirectoryExists(iconsDir);
+    
+    icons.forEach(filename => {
+      const filePath = path.join(iconsDir, filename);
+      
+      // Simple SVG placeholder
+      const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <rect width="24" height="24" fill="#ccc" />
+        <text x="12" y="12" font-family="sans-serif" font-size="8" text-anchor="middle" alignment-baseline="middle" fill="#333">
+          ${filename}
+        </text>
+      </svg>`;
+      
+      fs.writeFileSync(filePath, svgContent);
+      console.log(`Created placeholder SVG: ${filePath}`);
+    });
+  }
+  
+  console.log('All placeholder images have been generated successfully.');
+}
 
-icons.forEach(icon => {
-  const iconPath = path.join(baseDir, 'icons', icon.dir, icon.name);
-  generateSvgIcon(iconPath, icon.name.replace('.svg', ''));
-});
-
-// Create hero background image
-const heroPath = path.join(baseDir, '../maps', 'hero-map-background.jpg');
-generatePlaceholderHtml(heroPath, 1920, 1080, 'Hero Background', '#1a2e42', '#ffffff');
-
-console.log('All placeholder files have been generated successfully!'); 
+// Execute the function to generate placeholders
+generateImagePlaceholders(); 

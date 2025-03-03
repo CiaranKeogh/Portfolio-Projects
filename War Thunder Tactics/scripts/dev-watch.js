@@ -49,6 +49,9 @@ function checkAndGeneratePlaceholders() {
       colorLog('yellow', '⚠️ Placeholder images not detected. Generating placeholders...');
       execSync('npm run generate-placeholders', { stdio: 'inherit' });
       colorLog('green', '✅ Placeholders generated successfully.');
+      
+      // We're using placeholder images instead of real map assets
+      // The copy-map-assets script has been disabled
     }
   } catch (error) {
     console.error(`${consoleColors.red}Error checking or generating placeholders:${consoleColors.reset}`, error);

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { maps, Map } from '@/data/maps';
 
 export function MapCarousel() {

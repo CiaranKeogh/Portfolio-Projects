@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "generate-placeholders": "node scripts/generate-placeholders-simple.js",
-    "dev-watch": "node scripts/dev-watch.js"
+    "dev-watch": "node scripts/dev-watch.js",
+    "copy-map-assets": "node scripts/copy-map-assets.js",
+    "check-map-assets": "node scripts/check-map-assets.js"
   },
   "keywords": [
     "war thunder",
