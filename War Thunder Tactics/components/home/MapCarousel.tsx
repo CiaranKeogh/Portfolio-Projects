@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { maps, Map } from '@/data/maps';
 
 export function MapCarousel() {
@@ -41,12 +42,21 @@ export function MapCarousel() {
                 <div className="grid grid-cols-1 md:grid-cols-2 bg-gunmetal/80">
                   {/* Map thumbnail */}
                   <div className="relative h-64 md:h-96">
-                    <div className="absolute inset-0 bg-deep-blue/80 flex items-center justify-center">
-                      <span className="text-off-white text-lg font-medium p-4 text-center">
+                    <div className="absolute inset-0 z-10">
+                      <Image 
+                        src={map.thumbnail} 
+                        alt={`${map.name} map thumbnail`}
+                        width={800}
+                        height={500}
+                        className="w-full h-full object-cover"
+                        priority={index === 0}
+                      />
+                    </div>
+                    <div className="absolute bottom-4 left-4 z-20">
+                      <span className="text-off-white text-lg font-medium px-4 py-2 bg-deep-blue/60 rounded-lg">
                         {map.name}
                       </span>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-gunmetal to-transparent opacity-70"></div>
                   </div>
                   
                   {/* Map details */}

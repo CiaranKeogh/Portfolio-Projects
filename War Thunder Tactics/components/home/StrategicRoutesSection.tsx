@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { strategicRoutes, StrategicRoute } from '@/data/routes';
 
 export function StrategicRoutesSection() {
@@ -93,15 +94,21 @@ export function StrategicRoutesSection() {
           {/* Route details */}
           <div className="lg:col-span-3 bg-gunmetal/80 rounded-xl overflow-hidden">
             <div className="relative h-64 md:h-80">
-              {/* Map background placeholder */}
-              <div className="absolute inset-0 bg-burnt-orange/30 flex items-center justify-center">
-                <span className="text-off-white text-xl font-semibold text-center p-4">
-                  {activeRoute.map}: {activeRoute.name}
-                </span>
+              {/* Using actual map image */}
+              <div className="absolute inset-0">
+                <Image 
+                  src={activeRoute.mapImage} 
+                  alt={`${activeRoute.map} map for ${activeRoute.name} route`}
+                  width={800}
+                  height={500}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-gunmetal/90 to-transparent"></div>
               
-              <div className="absolute bottom-0 left-0 right-0 p-6">
+              {/* Bottom gradient for text readability */}
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-gunmetal/90 to-transparent z-10"></div>
+              
+              <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
                 <h3 className="text-2xl font-bold text-off-white mb-1">{activeRoute.name}</h3>
                 <p className="text-off-white/90 text-sm">{activeRoute.map}</p>
               </div>

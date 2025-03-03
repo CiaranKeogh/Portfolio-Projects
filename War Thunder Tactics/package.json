@@ -14,7 +14,8 @@
     "check-map-assets": "node scripts/check-map-assets.js",
     "run-project": "node scripts/start-project.js",
     "cleanup-images": "node scripts/cleanup-unused-images.js",
-    "import-map-assets": "node scripts/import-map-assets.js"
+    "import-map-assets": "node scripts/import-map-assets.js",
+    "replace-map-assets": "node scripts/replace-map-assets.js"
   },
   "keywords": [
     "war thunder",

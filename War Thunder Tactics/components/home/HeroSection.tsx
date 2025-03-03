@@ -1,11 +1,20 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function HeroSection() {
   return (
     <section className="relative flex items-center justify-center py-24 overflow-hidden bg-gunmetal">
-      {/* Background with solid color instead of image */}
-      <div className="absolute inset-0 bg-deep-blue/20 z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-gunmetal/70 to-gunmetal"></div>
+      {/* Background with actual map image */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/images/maps/hero-map-background.jpg"
+          alt="War Thunder Map Background"
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Subtle dark gradient at the bottom for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-gunmetal/90 via-gunmetal/20 to-transparent"></div>
       </div>
       
       <div className="container mx-auto px-4 z-10 text-center">
