@@ -6,14 +6,16 @@ import { maps, Map } from '@/data/maps';
 import Link from 'next/link';
 
 export function MapCarousel() {
+  // Only use the first 4 maps for the Popular Maps section
+  const displayMaps = maps.slice(0, 4);
   const [activeIndex, setActiveIndex] = useState(0);
   
   const nextSlide = () => {
-    setActiveIndex((current) => (current === maps.length - 1 ? 0 : current + 1));
+    setActiveIndex((current) => (current === displayMaps.length - 1 ? 0 : current + 1));
   };
   
   const prevSlide = () => {
-    setActiveIndex((current) => (current === 0 ? maps.length - 1 : current - 1));
+    setActiveIndex((current) => (current === 0 ? displayMaps.length - 1 : current - 1));
   };
   
   const goToSlide = (index: number) => {
@@ -44,7 +46,7 @@ export function MapCarousel() {
             className="flex transition-transform duration-700 ease-in-out"
             style={{ transform: `translateX(-${activeIndex * 100}%)` }}
           >
-            {maps.map((map: Map, index: number) => (
+            {displayMaps.map((map: Map, index: number) => (
               <div key={map.id} className="min-w-full">
                 <div className="grid grid-cols-1 md:grid-cols-2 bg-gunmetal/80">
                   {/* Map thumbnail */}
@@ -180,7 +182,7 @@ export function MapCarousel() {
           
           {/* Indicators */}
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
-            {maps.map((_, index) => (
+            {displayMaps.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
