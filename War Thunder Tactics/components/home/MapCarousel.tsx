@@ -52,11 +52,6 @@ export function MapCarousel() {
                         priority={index === 0}
                       />
                     </div>
-                    <div className="absolute bottom-4 left-4 z-20">
-                      <span className="text-off-white text-lg font-medium px-4 py-2 bg-deep-blue/60 rounded-lg">
-                        {map.name}
-                      </span>
-                    </div>
                   </div>
                   
                   {/* Map details */}
@@ -177,7 +172,7 @@ export function MapCarousel() {
           </button>
           
           {/* Indicators */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
             {maps.map((_, index) => (
               <button
                 key={index}

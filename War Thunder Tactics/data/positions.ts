@@ -45,8 +45,8 @@ export const powerPositions: PowerPosition[] = [
   {
     id: "position-2",
     name: "Factory Ruins",
-    map: "Stalingrad",
-    mapImage: "/images/maps/stalingrad.jpg",
+    map: "Berlin",
+    mapImage: "/images/maps/berlin.jpg",
     description: "These ruins provide excellent cover while allowing you to control the central corridor of the map. Multiple firing positions let you adapt as the battle progresses.",
     coordinates: {
       x: 38,
