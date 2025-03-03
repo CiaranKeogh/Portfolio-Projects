@@ -12,6 +12,7 @@ export interface Map {
   dateAdded: string;
   powerPositionsCount: number;
   strategicRoutesCount: number;
+  layouts?: string[]; // Array of layout image paths
 }
 
 // Maps data for the War Thunder Tactics website
@@ -29,7 +30,15 @@ export const maps: Map[] = [
     viewCount: 8547,
     dateAdded: "2022-10-15",
     powerPositionsCount: 8,
-    strategicRoutesCount: 12
+    strategicRoutesCount: 12,
+    layouts: [
+      "/images/maps/layouts/rhine_layout1.jpg",
+      "/images/maps/layouts/rhine_layout2.jpg",
+      "/images/maps/layouts/rhine_layout3.jpg",
+      "/images/maps/layouts/rhine_layout4.jpg",
+      "/images/maps/layouts/rhine_layout5.jpg",
+      "/images/maps/layouts/rhine_layout6.jpg"
+    ]
   },
   {
     id: "map-2",
