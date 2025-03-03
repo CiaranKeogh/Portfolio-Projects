@@ -47,7 +47,7 @@ export function MapCard({ map }: MapCardProps) {
           <p className="text-off-white/80 text-sm line-clamp-2">{map.description}</p>
           
           <div className="mt-4 flex justify-between items-center">
-            <span className="text-burnt-orange font-medium text-sm">View Tactics</span>
+            <span className="text-burnt-orange font-medium text-sm">View Map</span>
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               className="h-5 w-5 text-burnt-orange transform group-hover:translate-x-1 transition-transform" 

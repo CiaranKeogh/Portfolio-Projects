@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { maps, Map } from '@/data/maps';
+import Link from 'next/link';
 
 export function MapCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -26,10 +27,16 @@ export function MapCarousel() {
           <h2 className="text-3xl md:text-4xl font-bold text-off-white mb-4">
             Popular Maps
           </h2>
-          <p className="text-off-white/80 max-w-2xl mx-auto">
+          <p className="text-off-white/80 max-w-2xl mx-auto mb-6">
             Explore our detailed map database with community-created power positions,
             strategic routes, and tactical tips for War Thunder's most played battlegrounds.
           </p>
+          <Link 
+            href="/maps" 
+            className="inline-block bg-burnt-orange hover:bg-burnt-orange/90 text-off-white font-medium py-2 px-4 rounded transition-colors"
+          >
+            Explore All Maps
+          </Link>
         </div>
         
         <div className="relative overflow-hidden rounded-xl border border-deep-blue/30">
@@ -137,12 +144,12 @@ export function MapCarousel() {
                     </div>
                     
                     <div className="mt-auto">
-                      <a 
-                        href={`/maps/${map.id}`} 
+                      <Link 
+                        href={`/maps/${map.id.replace('map-', '')}`} 
                         className="inline-block w-full bg-burnt-orange hover:bg-burnt-orange/90 text-off-white font-medium py-3 px-4 rounded text-center transition-colors"
                       >
                         Explore Map
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
