@@ -1,0 +1,146 @@
+Project Overview
+The goal is to create an automated system that processes NHS Dictionary of Medicines and Devices (dm+d) data to match Actual Medicinal Product Packs (AMPP) to Virtual Medicinal Product Packs (VMPP), Global Trade Item Numbers (GTIN) to AMPP, and calculate missing drug tariff prices based on similar products. The processed dataset will support a future website where users can query products by name or GTIN and click on a VMPP to display all associated AMPPs. The output must include the following fields for each product: VMPP, VMP, AMPP, Description, Brand or Generic, Drug Tariff Price, a flag indicating whether the Drug Tariff Price was calculated or sourced from the initial dataset, and the specific process used for price calculation (e.g., "Same VMPP" or "Same VMP"). The system must handle large XML files, automate updates, and scale efficiently.
+Target Date: March 3, 2025 (current date for reference).
+Functional Requirements
+1. Data Ingestion and Processing
+1.1 Download Handling
+Source: NHS England TRUD service (NHSBSA dm+d).  
+
+Files to Download:  
+f_vmp2.xml (Virtual Medicinal Product)  
+
+f_vmpp2.xml (Virtual Medicinal Product Pack)  
+
+f_amp2.xml (Actual Medicinal Product)  
+
+f_ampp2.xml (Actual Medicinal Product Pack)  
+
+f_gtin2.xml (GTIN mappings)
+
+Automation:  
+Obtain an API key from TRUD to access the files.  
+
+Automate downloads weekly, every Monday at 02:00 UTC, using a cron job or a scheduling mechanism.  
+
+Store files in a data/ directory, overwriting previous versions with each update.
+
+Error Handling:  
+Retry failed downloads up to 3 times with a 5-minute delay between attempts.  
+
+Log errors to a file (e.g., logs/download.log) for troubleshooting.
+
+1.2 Data Parsing
+Input: XML files from the data/ directory.  
+
+Output: SQLite database (dmd_data.db) with tables:  
+vmp: VPID, DESC  
+
+vmpp: VPPID, VPID, DESC  
+
+amp: APID, VPID, DESC  
+
+ampp: APID, VPPID, DESC, PRICE (nullable), PRICE_SOURCE (text, 'initial' or 'calculated'), PRICE_METHOD (text, nullable, e.g., 'Same VMPP', 'Same VMP')  
+
+gtin: GTIN, APID
+
+Process:  
+Parse XML files in chunks of 1,000 records to manage large file sizes.  
+
+Extract key fields (e.g., APID, VPPID, DESC, PRICE) and load into SQLite tables.  
+
+Add a PRICE_SOURCE column to ampp to track whether PRICE is from the initial dataset ('initial') or calculated ('calculated').  
+
+Add a PRICE_METHOD column to ampp to specify the calculation method (e.g., 'Same VMPP', 'Same VMP') when PRICE is calculated; leave nullable for initial prices.  
+
+For AMPP records with PRICE in the XML, set PRICE_SOURCE to 'initial' and leave PRICE_METHOD null; leave PRICE nullable for missing values.
+
+1.3 Matching
+AMPP to VMPP:  
+Join ampp and vmpp tables on VPPID to link each AMPP to its VMPP.  
+
+Ensure all AMPPs associated with a given VMPP are retrievable as a group (e.g., via a query selecting all APIDs where VPPID matches a specific value).  
+
+For AMPPs with missing VPPIDs, use an LLM to parse the AMPP description (DESC) and match it to a VMPP description, processing in batches of 50 records.
+
+GTIN to AMPP:  
+Join gtin and ampp tables on APID to link GTINs to AMPPs.  
+
+For GTINs with missing APIDs, use an LLM to infer matches from product descriptions if additional metadata is available.
+
+1.4 Pricing Rules to Fill Gaps
+Objective: Calculate missing PRICE values in the ampp table, update PRICE_SOURCE, and set PRICE_METHOD.  
+
+Rules:  
+Same VMPP (Primary):  
+For each AMPP with a null PRICE, calculate the average PRICE of other AMPPs with the same VPPID that have a non-null PRICE.  
+
+Update the AMPP’s PRICE with this average, set PRICE_SOURCE to 'calculated', and set PRICE_METHOD to 'Same VMPP'.  
+
+Only apply this if at least one other AMPP with the same VPPID has a PRICE.
+
+Same VMP (Fallback):  
+If no prices exist for the VMPP:  
+Join ampp to vmpp to vmp using VPPID and VPID.  
+
+Use an LLM to parse the AMPP description (DESC) and extract strength (e.g., "500mg") and pack size (e.g., "32"), processing in batches of 50 records.  
+
+For AMPPs with the same VPID and known prices, calculate price per unit (PRICE ÷ pack size).  
+
+Estimate the missing PRICE as per-unit price × target pack size, set PRICE_SOURCE to 'calculated', and set PRICE_METHOD to 'Same VMP'.
+
+Example: If "Paracetamol 500mg tablets 16 pack" has PRICE £0.80 (initial), price per tablet is £0.05; for "Paracetamol 500mg tablets 32 pack" with no PRICE, estimate £0.05 × 32 = £1.60 (calculated, 'Same VMP').
+
+Default (Last Resort):  
+If no similar products (same VMPP or VMP) have prices, set PRICE to 0, PRICE_SOURCE to 'calculated', PRICE_METHOD to 'None', and flag for manual review (e.g., in a separate log).
+
+Storage: Update the ampp table with calculated PRICE, PRICE_SOURCE, and PRICE_METHOD values.
+
+1.5 Unified Search Table
+Table: search_data with columns:  
+VMPP (VMPP_DESC from vmpp)  
+
+VMP (VMP_DESC from vmp)  
+
+AMPP (APID from ampp)  
+
+Description (AMPP_DESC from ampp)  
+
+Brand_or_Generic (derived, see below)  
+
+Drug_Tariff_Price (PRICE from ampp)  
+
+Price_Source (PRICE_SOURCE from ampp)  
+
+Price_Method (PRICE_METHOD from ampp)
+
+Process:  
+Join ampp, vmpp, and vmp tables on VPPID and VPID to create a unified dataset.  
+
+Ensure the table supports retrieving all AMPPs for a given VMPP by maintaining the VPPID relationship (e.g., a query like SELECT * FROM search_data WHERE VPPID = <specific_vppid> returns all associated AMPPs with their details).  
+
+Derive Brand_or_Generic:  
+Compare VMPP_DESC and AMPP_DESC after removing the supplier name in brackets (e.g., "(A A H Pharmaceuticals Ltd)") from AMPP_DESC.  
+
+If the resulting AMPP_DESC matches VMPP_DESC exactly, classify as "Generic"; otherwise, classify as "Brand".  
+
+Example:  
+VMPP: "Paracetamol 500mg soluble tablets 24 tablet"  
+
+AMPP: "Paracetamol 500mg soluble tablets (A A H Pharmaceuticals Ltd) 24 tablet" → Remove supplier → "Paracetamol 500mg soluble tablets 24 tablet" → Matches VMPP → "Generic"  
+
+AMPP: "Panadol ActiFast Soluble tablets (Haleon UK Trading Ltd) 24 tablet" → Remove supplier → "Panadol ActiFast Soluble tablets 24 tablet" → Differs from VMPP → "Brand"
+
+Use regular expressions or string manipulation to remove text in brackets; use an LLM in batches of 50 records only if parsing ambiguities arise (e.g., multiple bracketed sections).
+
+Create indexes on Description, AMPP, and VPPID for fast searches and VMPP-to-AMPP lookups.
+
+Example Output
+For a future website:  
+User sees: VMPP "Paracetamol 500mg soluble tablets 24 tablet".  
+
+Clicking it shows all AMPPs:  
+AMPP: "12345", Description: "Paracetamol 500mg soluble tablets (A A H Pharmaceuticals Ltd) 24 tablet", VMP: "Paracetamol 500mg soluble tablets", Brand or Generic: "Generic", Drug Tariff Price: "1.50", Price Source: "Initial", Price Method: null  
+
+AMPP: "12346", Description: "Panadol ActiFast Soluble tablets (Haleon UK Trading Ltd) 24 tablet", VMP: "Paracetamol 500mg soluble tablets", Brand or Generic: "Brand", Drug Tariff Price: "1.80", Price Source: "Calculated", Price Method: "Same VMPP"
+
+
