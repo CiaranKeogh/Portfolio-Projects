@@ -1,146 +1,123 @@
 Project Overview
-The goal is to create an automated system that processes NHS Dictionary of Medicines and Devices (dm+d) data to match Actual Medicinal Product Packs (AMPP) to Virtual Medicinal Product Packs (VMPP), Global Trade Item Numbers (GTIN) to AMPP, and calculate missing drug tariff prices based on similar products. The processed dataset will support a future website where users can query products by name or GTIN and click on a VMPP to display all associated AMPPs. The output must include the following fields for each product: VMPP, VMP, AMPP, Description, Brand or Generic, Drug Tariff Price, a flag indicating whether the Drug Tariff Price was calculated or sourced from the initial dataset, and the specific process used for price calculation (e.g., "Same VMPP" or "Same VMP"). The system must handle large XML files, automate updates, and scale efficiently.
-Target Date: March 3, 2025 (current date for reference).
+The goal is to create an automated system that processes NHS Dictionary of Medicines and Devices (dm+d) data to match Actual Medicinal Product Packs (AMPP) to Virtual Medicinal Product Packs (VMPP) and Global Trade Item Numbers (GTIN) to AMPP, and calculate missing drug tariff prices based on similar products. 
+Good to know
+The f_gtin2 file is nested within an additional ZIP file that will need to be processed. 
+Access to the TRUD Requires an API Key. The same with Google Gemini, both should be kept secret. 
+You need to download the ZIP file for dm+d to get access to the required “files to download”, this can be done by the following:
+Go to: https://isd.digital.nhs.uk/trud/api/v1/keys/INSERT_API_KEY/items/24/releases?latest
+Extract the archiveFileUrl from the releases[0] object in the JSON that’s returned. This will download the ZIP file for processing. 
+
 Functional Requirements
 1. Data Ingestion and Processing
 1.1 Download Handling
-Source: NHS England TRUD service (NHSBSA dm+d).  
-
-Files to Download:  
-f_vmp2.xml (Virtual Medicinal Product)  
-
-f_vmpp2.xml (Virtual Medicinal Product Pack)  
-
-f_amp2.xml (Actual Medicinal Product)  
-
-f_ampp2.xml (Actual Medicinal Product Pack)  
-
-f_gtin2.xml (GTIN mappings)
-
-Automation:  
-Obtain an API key from TRUD to access the files.  
-
-Automate downloads weekly, every Monday at 02:00 UTC, using a cron job or a scheduling mechanism.  
-
-Store files in a data/ directory, overwriting previous versions with each update.
-
-Error Handling:  
-Retry failed downloads up to 3 times with a 5-minute delay between attempts.  
-
-Log errors to a file (e.g., logs/download.log) for troubleshooting.
-
+•	Source: NHS England TRUD service (NHSBSA dm+d). 
+•	Files to Download: 
+o	f_vmp2.xml (Virtual Medicinal Product) 
+o	f_vmpp2.xml (Virtual Medicinal Product Pack) 
+o	f_amp2.xml (Actual Medicinal Product) 
+o	f_ampp2.xml (Actual Medicinal Product Pack) 
+o	f_gtin2.xml (GTIN mappings)
+•	Automation: 
+o	Obtain an API key from TRUD to access the files. 
+o	Automate downloads weekly, every Monday at 02:00 UTC, using a cron job or scheduling mechanism. 
+o	Store files in a data/ directory, overwriting previous versions with each update.
+•	Error Handling: 
+o	Retry failed downloads up to 3 times with a 5-minute delay between attempts. 
+o	Log errors to a file (e.g., logs/download.log) for troubleshooting.
 1.2 Data Parsing
-Input: XML files from the data/ directory.  
-
-Output: SQLite database (dmd_data.db) with tables:  
-vmp: VPID, DESC  
-
-vmpp: VPPID, VPID, DESC  
-
-amp: APID, VPID, DESC  
-
-ampp: APID, VPPID, DESC, PRICE (nullable), PRICE_SOURCE (text, 'initial' or 'calculated'), PRICE_METHOD (text, nullable, e.g., 'Same VMPP', 'Same VMP')  
-
-gtin: GTIN, APID
-
-Process:  
-Parse XML files in chunks of 1,000 records to manage large file sizes.  
-
-Extract key fields (e.g., APID, VPPID, DESC, PRICE) and load into SQLite tables.  
-
-Add a PRICE_SOURCE column to ampp to track whether PRICE is from the initial dataset ('initial') or calculated ('calculated').  
-
-Add a PRICE_METHOD column to ampp to specify the calculation method (e.g., 'Same VMPP', 'Same VMP') when PRICE is calculated; leave nullable for initial prices.  
-
-For AMPP records with PRICE in the XML, set PRICE_SOURCE to 'initial' and leave PRICE_METHOD null; leave PRICE nullable for missing values.
-
-1.3 Matching
-AMPP to VMPP:  
-Join ampp and vmpp tables on VPPID to link each AMPP to its VMPP.  
-
-Ensure all AMPPs associated with a given VMPP are retrievable as a group (e.g., via a query selecting all APIDs where VPPID matches a specific value).  
-
-For AMPPs with missing VPPIDs, use an LLM to parse the AMPP description (DESC) and match it to a VMPP description, processing in batches of 50 records.
-
-GTIN to AMPP:  
-Join gtin and ampp tables on APID to link GTINs to AMPPs.  
-
-For GTINs with missing APIDs, use an LLM to infer matches from product descriptions if additional metadata is available.
-
+•	Input: XML files from the data/ directory, validated against their provided XSDs. 
+•	Output: SQLite database (dmd_data.db) with tables reflecting XSD structures: 
+o	vmp: 
+	VPID (integer, required): Unique identifier from VMP element. 
+	NM (string, required): Name/description from VMP element (used as "VMP" field).
+o	vmpp: 
+	VPPID (integer, required): Unique identifier from VMPP element. 
+	VPID (integer, required): Links to vmp.VPID. 
+	NM (string, required): Name/description from VMPP element (used as "VMPP" field). 
+	QTYVAL (float, required): Quantity value for pack size from VMPP. 
+	QTY_UOMCD (integer, required): Unit of measure code for quantity from VMPP. 
+	PRICE (integer, nullable): Drug tariff price from DTINFO element (in pence). 
+	DT (date, nullable): Date of the drug tariff price from DTINFO.
+o	amp: 
+	APID (integer, required): Unique identifier from AMP element. 
+	VPID (integer, required): Links to vmp.VPID. 
+	DESC (string, required): Description from AMP element. 
+	SUPPCD (integer, required): Supplier code.
+o	ampp: 
+	APPID (integer, required): Unique identifier from AMPP element (used as "AMPP" field). 
+	VPPID (integer, required): Links to vmpp.VPPID. 
+	APID (integer, required): Links to amp.APID. 
+	NM (string, required): Name/description from AMPP element (used as "Description" field). 
+	PRICE (integer, nullable): Drug tariff price from PRICE_INFO element (in pence). 
+	PRICE_SOURCE (text, 'initial' or 'calculated'): Tracks price origin. 
+	PRICE_METHOD (text, nullable, e.g., 'Same VMPP', 'Same VMP'): Specifies calculation method.
+o	gtin: 
+	AMPPID (integer, required): Links to ampp.APPID. 
+	GTIN (string, required, 13 or 14 digits): Barcode from GTINDATA element. 
+	STARTDT (date, required): Start date of GTIN validity. 
+	ENDDT (date, nullable): End date of GTIN validity (null if active).
+•	Process: 
+o	Parse XML files in chunks of 1,000 records using XSDs to validate structure and extract fields. 
+o	For f_vmpp2.xml, join VMPP and DTINFO on VPPID to include PRICE and DT where available; store the latest price based on DT (most recent date). 
+o	For f_ampp2.xml, join AMPP and PRICE_INFO on APPID to include PRICE where available, setting PRICE_SOURCE to 'initial' and PRICE_METHOD to null; leave PRICE null if no PRICE_INFO exists. 
+o	Load parsed data into SQLite tables, preserving XSD-defined relationships.
+1.3 Relationships Between Files
+•	Based on XSDs: 
+o	vmp.VPID → vmpp.VPID: Links Virtual Medicinal Product to Virtual Medicinal Product Pack (one-to-many). 
+o	vmp.VPID → amp.VPID: Links Virtual Medicinal Product to Actual Medicinal Product (one-to-many). 
+o	vmpp.VPPID → ampp.VPPID: Links Virtual Medicinal Product Pack to Actual Medicinal Product Pack (one-to-many), enabling retrieval of all AMPPs for a VMPP. 
+o	amp.APID → ampp.APID: Links Actual Medicinal Product to Actual Medicinal Product Pack (one-to-many). 
+o	ampp.APPID → gtin.AMPPID: Links Actual Medicinal Product Pack to GTIN (one-to-many, as an AMPP can have multiple GTINs).
+•	Implementation: 
+o	Use SQL joins on these keys to build the search_data table, ensuring referential integrity. 
+o	No LLM needed; relationships are explicit in the XSDs.
 1.4 Pricing Rules to Fill Gaps
-Objective: Calculate missing PRICE values in the ampp table, update PRICE_SOURCE, and set PRICE_METHOD.  
-
-Rules:  
-Same VMPP (Primary):  
-For each AMPP with a null PRICE, calculate the average PRICE of other AMPPs with the same VPPID that have a non-null PRICE.  
-
-Update the AMPP’s PRICE with this average, set PRICE_SOURCE to 'calculated', and set PRICE_METHOD to 'Same VMPP'.  
-
-Only apply this if at least one other AMPP with the same VPPID has a PRICE.
-
-Same VMP (Fallback):  
-If no prices exist for the VMPP:  
-Join ampp to vmpp to vmp using VPPID and VPID.  
-
-Use an LLM to parse the AMPP description (DESC) and extract strength (e.g., "500mg") and pack size (e.g., "32"), processing in batches of 50 records.  
-
-For AMPPs with the same VPID and known prices, calculate price per unit (PRICE ÷ pack size).  
-
-Estimate the missing PRICE as per-unit price × target pack size, set PRICE_SOURCE to 'calculated', and set PRICE_METHOD to 'Same VMP'.
-
-Example: If "Paracetamol 500mg tablets 16 pack" has PRICE £0.80 (initial), price per tablet is £0.05; for "Paracetamol 500mg tablets 32 pack" with no PRICE, estimate £0.05 × 32 = £1.60 (calculated, 'Same VMP').
-
-Default (Last Resort):  
-If no similar products (same VMPP or VMP) have prices, set PRICE to 0, PRICE_SOURCE to 'calculated', PRICE_METHOD to 'None', and flag for manual review (e.g., in a separate log).
-
-Storage: Update the ampp table with calculated PRICE, PRICE_SOURCE, and PRICE_METHOD values.
-
+•	Objective: Calculate missing PRICE values in the ampp table, update PRICE_SOURCE, and set PRICE_METHOD, prioritizing AMPP initial prices over VMPP prices when both exist. 
+•	Rules: 
+1.	Initial Price Assignment: 
+	If ampp.PRICE exists (from PRICE_INFO), use it, set PRICE_SOURCE to 'initial', and PRICE_METHOD to null. 
+	If ampp.PRICE is null but vmpp.PRICE exists (from DTINFO for the matching VPPID), use vmpp.PRICE, set PRICE_SOURCE to 'initial', and PRICE_METHOD to null.
+2.	Same VMPP (Primary Calculation): 
+	For ampp records with null PRICE and no matching vmpp.PRICE: 
+	Calculate the average PRICE of other ampp records with the same VPPID and non-null PRICE (from either PRICE_INFO or prior calculations). 
+	Update PRICE with this average, set PRICE_SOURCE to 'calculated', and set PRICE_METHOD to 'Same VMPP'. 
+	Apply only if at least one other AMPP with the same VPPID has a PRICE. 
+	Use vmpp.QTYVAL and QTY_UOMCD to ensure pack sizes match, avoiding unit discrepancies.
+3.	Same VMP (Fallback Calculation): 
+	If no prices exist for the VMPP (neither vmpp.PRICE nor any ampp.PRICE for the VPPID): 
+	Join ampp to vmpp to vmp using VPPID and VPID. 
+	Calculate price per unit (PRICE ÷ vmpp.QTYVAL) from AMPPs with the same VPID and known prices (from PRICE_INFO or DTINFO), using QTY_UOMCD to verify unit consistency. 
+	Estimate missing PRICE as per-unit price × target QTYVAL, set PRICE_SOURCE to 'calculated', and set PRICE_METHOD to 'Same VMP'.
+	Example: "Paracetamol 500mg tablets 16 pack" has PRICE 80p (initial), QTYVAL 16 → 5p/tablet; "Paracetamol 500mg tablets 32 pack" with QTYVAL 32 → 5p × 32 = 160p (calculated, 'Same VMP').
+4.	Default (Last Resort): 
+	If no similar products (same VMPP or VMP) have prices, set PRICE to 0, PRICE_SOURCE to 'calculated', PRICE_METHOD to 'None', and log for manual review.
+•	Storage: Update ampp table with calculated PRICE, PRICE_SOURCE, and PRICE_METHOD. 
+•	LLM Role: No LLM needed; XSDs provide PRICE from DTINFO and PRICE_INFO, and QTYVAL/QTY_UOMCD for precise calculations.
 1.5 Unified Search Table
-Table: search_data with columns:  
-VMPP (VMPP_DESC from vmpp)  
-
-VMP (VMP_DESC from vmp)  
-
-AMPP (APID from ampp)  
-
-Description (AMPP_DESC from ampp)  
-
-Brand_or_Generic (derived, see below)  
-
-Drug_Tariff_Price (PRICE from ampp)  
-
-Price_Source (PRICE_SOURCE from ampp)  
-
-Price_Method (PRICE_METHOD from ampp)
-
-Process:  
-Join ampp, vmpp, and vmp tables on VPPID and VPID to create a unified dataset.  
-
-Ensure the table supports retrieving all AMPPs for a given VMPP by maintaining the VPPID relationship (e.g., a query like SELECT * FROM search_data WHERE VPPID = <specific_vppid> returns all associated AMPPs with their details).  
-
-Derive Brand_or_Generic:  
-Compare VMPP_DESC and AMPP_DESC after removing the supplier name in brackets (e.g., "(A A H Pharmaceuticals Ltd)") from AMPP_DESC.  
-
-If the resulting AMPP_DESC matches VMPP_DESC exactly, classify as "Generic"; otherwise, classify as "Brand".  
-
-Example:  
-VMPP: "Paracetamol 500mg soluble tablets 24 tablet"  
-
-AMPP: "Paracetamol 500mg soluble tablets (A A H Pharmaceuticals Ltd) 24 tablet" → Remove supplier → "Paracetamol 500mg soluble tablets 24 tablet" → Matches VMPP → "Generic"  
-
-AMPP: "Panadol ActiFast Soluble tablets (Haleon UK Trading Ltd) 24 tablet" → Remove supplier → "Panadol ActiFast Soluble tablets 24 tablet" → Differs from VMPP → "Brand"
-
-Use regular expressions or string manipulation to remove text in brackets; use an LLM in batches of 50 records only if parsing ambiguities arise (e.g., multiple bracketed sections).
-
-Create indexes on Description, AMPP, and VPPID for fast searches and VMPP-to-AMPP lookups.
-
-Example Output
-For a future website:  
-User sees: VMPP "Paracetamol 500mg soluble tablets 24 tablet".  
-
-Clicking it shows all AMPPs:  
-AMPP: "12345", Description: "Paracetamol 500mg soluble tablets (A A H Pharmaceuticals Ltd) 24 tablet", VMP: "Paracetamol 500mg soluble tablets", Brand or Generic: "Generic", Drug Tariff Price: "1.50", Price Source: "Initial", Price Method: null  
-
-AMPP: "12346", Description: "Panadol ActiFast Soluble tablets (Haleon UK Trading Ltd) 24 tablet", VMP: "Paracetamol 500mg soluble tablets", Brand or Generic: "Brand", Drug Tariff Price: "1.80", Price Source: "Calculated", Price Method: "Same VMPP"
-
+•	Table: search_data with columns: 
+o	VMPP (vmpp.NM, string): Virtual Medicinal Product Pack description. 
+o	VMP (vmp.NM, string): Virtual Medicinal Product description. 
+o	AMPP (ampp.APPID, integer): Actual Medicinal Product Pack identifier. 
+o	Description (ampp.NM, string): AMPP description. 
+o	Brand_or_Generic (text, derived): "Brand" or "Generic". 
+o	Drug_Tariff_Price (ampp.PRICE, integer): Price in pence. 
+o	Price_Source (ampp.PRICE_SOURCE, text): 'initial' or 'calculated'. 
+o	Price_Method (ampp.PRICE_METHOD, text): e.g., 'Same VMPP', 'Same VMP', or 'None'.
+•	Process: 
+o	Join ampp, vmpp, and vmp on VPPID and VPID to create the dataset, ensuring all AMPPs for a VMPP are grouped by VPPID. 
+o	Derive Brand_or_Generic: 
+	Remove supplier name in brackets from ampp.NM (e.g., "(A A H Pharmaceuticals Ltd)") using regular expressions. 
+	Compare the result to vmpp.NM: if identical, classify as "Generic"; otherwise, "Brand". 
+	Example: 
+	vmpp.NM: "Paracetamol 500mg soluble tablets 24 tablet" 
+	ampp.NM: "Paracetamol 500mg soluble tablets (A A H Pharmaceuticals Ltd) 24 tablet" → "Paracetamol 500mg soluble tablets 24 tablet" → "Generic" 
+	ampp.NM: "Panadol ActiFast Soluble tablets (Haleon UK Trading Ltd) 24 tablet" → "Panadol ActiFast Soluble tablets 24 tablet" → "Brand"
+	LLM Role: Use LLM only for rare cases where NM contains ambiguous formatting (e.g., multiple brackets not following the supplier pattern), processing in batches of 50 records.
+o	Create indexes on Description, AMPP, and VPPID for fast searches and VMPP-to-AMPP lookups.
+2. LLM Usage
+•	Minimized Reliance: 
+o	Pricing uses PRICE from DTINFO (VMPP) and PRICE_INFO (AMPP), with QTYVAL/QTY_UOMCD for calculations, eliminating LLM pack size parsing. 
+o	Relationships (VPID, VPPID, APID, APPID) are XSD-defined, removing LLM matching needs.
+•	Specific LLM Role: 
+o	Brand/Generic Edge Cases: Assist with parsing ampp.NM if supplier removal yields unclear results (e.g., non-standard naming or typos), expected to be <1% of records.
 
