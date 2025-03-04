@@ -1,0 +1,35 @@
+# Python-specific files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.env
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Data and logs
+/data/**/*.xml
+/data/**/*.zip
+/logs/*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE-specific files
+.idea/
+.vscode/
+*.swp
+*.swo 

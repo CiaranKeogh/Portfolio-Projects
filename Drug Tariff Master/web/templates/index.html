@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drug Tariff Master</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/static/css/main.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-pills me-2"></i>
+                Drug Tariff Master
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="statsLink">Statistics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Search Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Search Medicinal Products</h5>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Enter drug name (e.g. paracetamol, insulin, amoxicillin)">
+                                    <button class="btn btn-primary" type="button" id="searchButton">
+                                        <i class="fas fa-search me-1"></i> Search
+                                    </button>
+                                </div>
+                                <div class="form-text">Enter a drug name, active ingredient, or product description</div>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="recordTypeFilter" class="form-select">
+                                    <option value="">All Product Types</option>
+                                    <option value="VMP">Virtual Medicinal Product (VMP)</option>
+                                    <option value="VMPP">Virtual Medicinal Product Pack (VMPP)</option>
+                                    <option value="AMP">Actual Medicinal Product (AMP)</option>
+                                    <option value="AMPP">Actual Medicinal Product Pack (AMPP)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="text-center my-5 d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Searching the database...</p>
+        </div>
+        
+        <!-- Results Section -->
+        <div id="resultsSection" class="d-none">
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 id="resultsCount">0 results found</h5>
+                        <div>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary" id="exportCsvBtn">
+                                    <i class="fas fa-file-csv me-1"></i> Export CSV
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="printResultsBtn">
+                                    <i class="fas fa-print me-1"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Supplier</th>
+                                    <th>Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <nav>
+                        <ul class="pagination justify-content-center" id="resultsPagination">
+                            <!-- Pagination will be populated here -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Results Section -->
+        <div id="noResultsSection" class="d-none">
+            <div class="row">
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>No results found</h4>
+                    <p class="text-muted">Try a different search term or remove filters</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section (initially hidden) -->
+        <div id="statisticsSection" class="d-none">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Database Statistics</h5>
+                            <div id="statsContent">
+                                <p>Loading statistics...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal fade" id="productDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productDetailTitle">Product Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="productDetailBody">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p>Loading product details...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About Drug Tariff Master</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Drug Tariff Master is an application that allows you to search and browse the UK NHS Drug Tariff database. It provides information about medicinal products, including prices, strengths, and suppliers.</p>
+                    <h6>Data Structure:</h6>
+                    <ul>
+                        <li><strong>VMP</strong> - Virtual Medicinal Products: Conceptual products without a supplier</li>
+                        <li><strong>VMPP</strong> - Virtual Medicinal Product Packs: Conceptual packs of a VMP</li>
+                        <li><strong>AMP</strong> - Actual Medicinal Products: Actual products from specific suppliers</li>
+                        <li><strong>AMPP</strong> - Actual Medicinal Product Packs: Actual packs of an AMP with pricing</li>
+                    </ul>
+                    <p>Data is sourced from the NHS Business Services Authority (NHSBSA) via the TRUD service.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/main.js"></script>
+</body>
+</html> 
