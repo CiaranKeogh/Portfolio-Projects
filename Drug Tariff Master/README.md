@@ -154,10 +154,6 @@ The application uses the following XSD schemas to validate and process XML data:
 - **ampp_v2_3.xsd**: Actual Medicinal Product Packs
 - **lookup_v2_3.xsd**: Reference data for lookups
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
