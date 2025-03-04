@@ -90,8 +90,11 @@ def api_search():
             'name': result['NAME'],
             'strength': result['STRENGTH'] or '',
             'form': result['FORM'] or '',
+            'form_desc': result['FORM_DESC'] or '',
             'route': result['ROUTE'] or '',
+            'route_desc': result['ROUTE_DESC'] or '',
             'supplier': result['SUPPLIER'] or '',
+            'supplier_desc': result['SUPPLIER_DESC'] or '',
             'price': result['PRICE']
         } for result in results]
         
@@ -153,8 +156,66 @@ def api_product_details(record_type, product_id):
         table = table_map[record_type]
         id_field = id_field_map[record_type]
         
-        # Query the database for the product
-        query = f"SELECT * FROM {table} WHERE {id_field} = ?"
+        # Query the database for the product with lookup data
+        if record_type == 'VMP':
+            query = f"""
+                SELECT v.*, 
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM {table} v
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE v.{id_field} = ?
+            """
+        elif record_type == 'AMP':
+            query = f"""
+                SELECT a.*, 
+                       s.DESC as SUPPLIER_DESC,
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM {table} a
+                LEFT JOIN lookup_supplier s ON a.SUPPCD = s.CD
+                LEFT JOIN vmp v ON a.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE a.{id_field} = ?
+            """
+        elif record_type == 'VMPP':
+            query = f"""
+                SELECT vp.*, 
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM {table} vp
+                LEFT JOIN vmp v ON vp.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE vp.{id_field} = ?
+            """
+        elif record_type == 'AMPP':
+            query = f"""
+                SELECT ap.*, 
+                       s.DESC as SUPPLIER_DESC,
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM {table} ap
+                JOIN amp a ON ap.APID = a.APID
+                LEFT JOIN lookup_supplier s ON a.SUPPCD = s.CD
+                LEFT JOIN vmp v ON a.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE ap.{id_field} = ?
+            """
+        else:
+            query = f"SELECT * FROM {table} WHERE {id_field} = ?"
+            
         results = database.execute_query(query, (product_id,))
         
         if not results:
@@ -170,22 +231,56 @@ def api_product_details(record_type, product_id):
         
         if record_type == 'AMPP':
             # Get AMP information
-            amp_query = "SELECT * FROM amp WHERE APID = ?"
+            amp_query = """
+                SELECT a.*, 
+                       s.DESC as SUPPLIER_DESC,
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM amp a
+                LEFT JOIN lookup_supplier s ON a.SUPPCD = s.CD
+                LEFT JOIN vmp v ON a.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE a.APID = ?
+            """
             amp_results = database.execute_query(amp_query, (product['APID'],))
             if amp_results:
-                additional_info['amp'] = amp_results[0]
+                additional_info['amp'] = amp_results
                 
                 # Get VMP information
-                vmp_query = "SELECT * FROM vmp WHERE VPID = ?"
+                vmp_query = """
+                    SELECT v.*, 
+                           f.DESC as FORM_DESC, 
+                           r.DESC as ROUTE_DESC
+                    FROM vmp v
+                    LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                    LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                    LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                    LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                    WHERE v.VPID = ?
+                """
                 vmp_results = database.execute_query(vmp_query, (amp_results[0]['VPID'],))
                 if vmp_results:
-                    additional_info['vmp'] = vmp_results[0]
+                    additional_info['vmp'] = vmp_results
             
             # Get VMPP information
-            vmpp_query = "SELECT * FROM vmpp WHERE VPPID = ?"
+            vmpp_query = """
+                SELECT vp.*, 
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM vmpp vp
+                LEFT JOIN vmp v ON vp.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE vp.VPPID = ?
+            """
             vmpp_results = database.execute_query(vmpp_query, (product['VPPID'],))
             if vmpp_results:
-                additional_info['vmpp'] = vmpp_results[0]
+                additional_info['vmpp'] = vmpp_results
                 
             # Get GTIN information
             gtin_query = "SELECT * FROM gtin WHERE AMPPID = ?"
@@ -195,42 +290,132 @@ def api_product_details(record_type, product_id):
         
         elif record_type == 'AMP':
             # Get VMP information
-            vmp_query = "SELECT * FROM vmp WHERE VPID = ?"
+            vmp_query = """
+                SELECT v.*, 
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM vmp v
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE v.VPID = ?
+            """
             vmp_results = database.execute_query(vmp_query, (product['VPID'],))
             if vmp_results:
-                additional_info['vmp'] = vmp_results[0]
+                additional_info['vmp'] = vmp_results
             
             # Get AMPPs for this AMP
-            ampp_query = "SELECT * FROM ampp WHERE APID = ?"
+            ampp_query = """
+                SELECT ap.*, 
+                       s.DESC as SUPPLIER_DESC,
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM ampp ap
+                JOIN amp a ON ap.APID = a.APID
+                LEFT JOIN lookup_supplier s ON a.SUPPCD = s.CD
+                LEFT JOIN vmp v ON a.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE ap.APID = ?
+            """
             ampp_results = database.execute_query(ampp_query, (product_id,))
             if ampp_results:
                 additional_info['ampp'] = ampp_results
         
         elif record_type == 'VMPP':
             # Get VMP information
-            vmp_query = "SELECT * FROM vmp WHERE VPID = ?"
+            vmp_query = """
+                SELECT v.*, 
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM vmp v
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE v.VPID = ?
+            """
             vmp_results = database.execute_query(vmp_query, (product['VPID'],))
             if vmp_results:
                 additional_info['vmp'] = vmp_results[0]
             
             # Get AMPPs for this VMPP
-            ampp_query = "SELECT * FROM ampp WHERE VPPID = ?"
+            ampp_query = """
+                SELECT ap.*, 
+                       s.DESC as SUPPLIER_DESC,
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM ampp ap
+                JOIN amp a ON ap.APID = a.APID
+                LEFT JOIN lookup_supplier s ON a.SUPPCD = s.CD
+                LEFT JOIN vmp v ON a.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE ap.VPPID = ?
+            """
             ampp_results = database.execute_query(ampp_query, (product_id,))
             if ampp_results:
                 additional_info['ampp'] = ampp_results
         
         elif record_type == 'VMP':
             # Get VMPPs for this VMP
-            vmpp_query = "SELECT * FROM vmpp WHERE VPID = ?"
-            vmpp_results = database.execute_query(vmpp_query, (product_id,))
+            vmpp_query = """
+                SELECT vp.*, 
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM vmpp vp
+                LEFT JOIN vmp v ON vp.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE vp.VPID = ?
+            """
+            vmpp_results = database.execute_query(vmpp_query, (product['VPID'],))
             if vmpp_results:
                 additional_info['vmpp'] = vmpp_results
             
             # Get AMPs for this VMP
-            amp_query = "SELECT * FROM amp WHERE VPID = ?"
-            amp_results = database.execute_query(amp_query, (product_id,))
+            amp_query = """
+                SELECT a.*, 
+                       s.DESC as SUPPLIER_DESC,
+                       f.DESC as FORM_DESC, 
+                       r.DESC as ROUTE_DESC
+                FROM amp a
+                LEFT JOIN lookup_supplier s ON a.SUPPCD = s.CD
+                LEFT JOIN vmp v ON a.VPID = v.VPID
+                LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+                LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+                LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+                LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+                WHERE a.VPID = ?
+            """
+            amp_results = database.execute_query(amp_query, (product['VPID'],))
             if amp_results:
                 additional_info['amp'] = amp_results
+            
+            # Get VTM information if available
+            if product.get('VTMID'):
+                vtm_query = "SELECT * FROM vtm WHERE VTMID = ?"
+                vtm_results = database.execute_query(vtm_query, (product['VTMID'],))
+                if vtm_results:
+                    additional_info['vtm'] = vtm_results[0]
+                    
+            # Get ingredient information
+            ingredient_query = """
+                SELECT i.*, vi.*
+                FROM vmp_ingredient vi
+                JOIN ingredient i ON vi.ISID = i.ISID
+                WHERE vi.VPID = ?
+            """
+            ingredient_results = database.execute_query(ingredient_query, (product['VPID'],))
+            if ingredient_results:
+                additional_info['ingredients'] = ingredient_results
         
         return jsonify({
             'success': True,

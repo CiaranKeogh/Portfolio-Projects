@@ -356,6 +356,263 @@ def parse_gtin_data(xml_path):
         return False
 
 
+def parse_lookup_data(xml_path):
+    """
+    Parse lookup data from the XML file.
+    
+    Args:
+        xml_path (Path): Path to the lookup XML file.
+        
+    Returns:
+        bool: True if parsing was successful, False otherwise.
+    """
+    logger.info(f"Parsing lookup data from {xml_path}")
+    
+    try:
+        tree = etree.parse(str(xml_path))
+        root = tree.getroot()
+        
+        # Process each lookup category
+        lookup_categories = [
+            "CONTROL_DRUG_CATEGORY",
+            "LEGAL_CATEGORY",
+            "FORM",
+            "ROUTE",
+            "UNIT_OF_MEASURE",
+            "SUPPLIER",
+            # Add more as needed
+        ]
+        
+        for category in lookup_categories:
+            logger.info(f"Processing lookup category: {category}")
+            
+            # Find all info elements for this category
+            elements = root.xpath(f"//{category}/INFO")
+            
+            if not elements:
+                logger.warning(f"No elements found for lookup category: {category}")
+                continue
+                
+            # Prepare table name
+            table_name = f"lookup_{category.lower()}"
+            
+            # Extract and insert data
+            data_list = []
+            
+            for elem in elements:
+                cd = elem.find("CD").text
+                desc = elem.find("DESC").text
+                
+                record = {
+                    "CD": cd,
+                    "DESC": desc
+                }
+                
+                # Handle additional fields for some categories
+                cddt_elem = elem.find("CDDT")
+                if cddt_elem is not None:
+                    record["CDDT"] = cddt_elem.text
+                    
+                cdprev_elem = elem.find("CDPREV")
+                if cdprev_elem is not None:
+                    record["CDPREV"] = cdprev_elem.text
+                    
+                invalid_elem = elem.find("INVALID")
+                if invalid_elem is not None:
+                    record["INVALID"] = invalid_elem.text
+                
+                data_list.append(record)
+                
+                # Insert in chunks
+                if len(data_list) >= config.CHUNK_SIZE:
+                    database.insert_data(table_name, data_list)
+                    data_list = []
+            
+            # Insert any remaining data
+            if data_list:
+                database.insert_data(table_name, data_list)
+                
+        logger.info(f"Lookup parsing completed")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error parsing lookup data: {e}")
+        return False
+
+
+def parse_vtm_data(xml_path):
+    """
+    Parse VTM data from the XML file.
+    
+    Args:
+        xml_path (Path): Path to the VTM XML file.
+        
+    Returns:
+        bool: True if parsing was successful, False otherwise.
+    """
+    logger.info(f"Parsing VTM data from {xml_path}")
+    
+    try:
+        tree = etree.parse(str(xml_path))
+        root = tree.getroot()
+        
+        vtm_data = []
+        vtm_elements = root.xpath("//VTM")
+        
+        for i in range(0, len(vtm_elements), config.CHUNK_SIZE):
+            chunk = vtm_elements[i:i+config.CHUNK_SIZE]
+            
+            for vtm_elem in chunk:
+                vtmid = vtm_elem.find("VTMID").text
+                nm = vtm_elem.find("NM").text
+                
+                vtm_record = {
+                    "VTMID": int(vtmid),
+                    "NM": nm
+                }
+                
+                # Add optional fields if present
+                abbrevnm_elem = vtm_elem.find("ABBREVNM")
+                if abbrevnm_elem is not None:
+                    vtm_record["ABBREVNM"] = abbrevnm_elem.text
+                    
+                vtmidprev_elem = vtm_elem.find("VTMIDPREV")
+                if vtmidprev_elem is not None:
+                    vtm_record["VTMIDPREV"] = int(vtmidprev_elem.text)
+                    
+                vtmiddt_elem = vtm_elem.find("VTMIDDT")
+                if vtmiddt_elem is not None:
+                    vtm_record["VTMIDDT"] = vtmiddt_elem.text
+                    
+                invalid_elem = vtm_elem.find("INVALID")
+                if invalid_elem is not None:
+                    vtm_record["INVALID"] = int(invalid_elem.text)
+                
+                vtm_data.append(vtm_record)
+                
+            # Insert this chunk
+            database.insert_data("vtm", vtm_data)
+            vtm_data = []
+            
+        logger.info(f"VTM parsing completed")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error parsing VTM data: {e}")
+        return False
+
+
+def parse_ingredient_data(xml_path):
+    """
+    Parse ingredient data from the XML file.
+    
+    Args:
+        xml_path (Path): Path to the ingredient XML file.
+        
+    Returns:
+        bool: True if parsing was successful, False otherwise.
+    """
+    logger.info(f"Parsing ingredient data from {xml_path}")
+    
+    try:
+        tree = etree.parse(str(xml_path))
+        root = tree.getroot()
+        
+        ingredient_data = []
+        ingredient_elements = root.xpath("//INGREDIENT")
+        
+        for i in range(0, len(ingredient_elements), config.CHUNK_SIZE):
+            chunk = ingredient_elements[i:i+config.CHUNK_SIZE]
+            
+            for ingredient_elem in chunk:
+                isid = ingredient_elem.find("ISID").text
+                nm = ingredient_elem.find("NM").text
+                
+                ingredient_record = {
+                    "ISID": int(isid),
+                    "NM": nm
+                }
+                
+                # Add optional fields if present
+                isiddt_elem = ingredient_elem.find("ISIDDT")
+                if isiddt_elem is not None:
+                    ingredient_record["ISIDDT"] = isiddt_elem.text
+                    
+                isidprev_elem = ingredient_elem.find("ISIDPREV")
+                if isidprev_elem is not None:
+                    ingredient_record["ISIDPREV"] = int(isidprev_elem.text)
+                    
+                invalid_elem = ingredient_elem.find("INVALID")
+                if invalid_elem is not None:
+                    ingredient_record["INVALID"] = int(invalid_elem.text)
+                
+                ingredient_data.append(ingredient_record)
+                
+            # Insert this chunk
+            database.insert_data("ingredient", ingredient_data)
+            ingredient_data = []
+            
+        logger.info(f"Ingredient parsing completed")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error parsing ingredient data: {e}")
+        return False
+
+
+def parse_vmp_ingredient_data(xml_path):
+    """
+    Parse VMP ingredient data from the XML file.
+    
+    Args:
+        xml_path (Path): Path to the VMP XML file.
+        
+    Returns:
+        bool: True if parsing was successful, False otherwise.
+    """
+    logger.info(f"Parsing VMP ingredient data from {xml_path}")
+    
+    try:
+        tree = etree.parse(str(xml_path))
+        root = tree.getroot()
+        
+        # Extract VPI elements
+        vpi_elements = root.xpath("//VIRTUAL_PRODUCT_INGREDIENT/VPI")
+        
+        vpi_data = []
+        for i in range(0, len(vpi_elements), config.CHUNK_SIZE):
+            chunk = vpi_elements[i:i+config.CHUNK_SIZE]
+            
+            for vpi_elem in chunk:
+                vpid = vpi_elem.find("VPID").text
+                isid = vpi_elem.find("ISID").text
+                
+                vpi_record = {
+                    "VPID": int(vpid),
+                    "ISID": int(isid)
+                }
+                
+                # Add optional fields if present
+                basis_strntcd_elem = vpi_elem.find("BASIS_STRNTCD")
+                if basis_strntcd_elem is not None:
+                    vpi_record["BASIS_STRNTCD"] = basis_strntcd_elem.text
+                
+                # Add more optional fields similarly
+                
+                vpi_data.append(vpi_record)
+            
+            # Insert this chunk
+            database.insert_data("vmp_ingredient", vpi_data)
+            vpi_data = []
+            
+        logger.info(f"VMP ingredient parsing completed")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error parsing VMP ingredient data: {e}")
+        return False
+
+
 def find_xml_files():
     """
     Find all the relevant XML files in the data directory.
@@ -405,7 +662,16 @@ def process_all_files():
     
     # Process each file type in the correct order for foreign key constraints
     
-    # First VMP (Virtual Medicinal Product)
+    # First VTM (Virtual Therapeutic Moiety)
+    if 'vtm' in xml_files:
+        if not parse_vtm_data(xml_files['vtm']):
+            logger.error("VTM parsing failed")
+            return False
+    else:
+        logger.error("VTM file not found or invalid")
+        return False
+    
+    # Then VMP (Virtual Medicinal Product)
     if 'vmp' in xml_files:
         if not parse_vmp_data(xml_files['vmp']):
             logger.error("VMP parsing failed")
@@ -441,13 +707,40 @@ def process_all_files():
         logger.error("AMPP file not found or invalid")
         return False
     
-    # Finally GTIN mapping
+    # Then GTIN mapping
     if 'gtin' in xml_files:
         if not parse_gtin_data(xml_files['gtin']):
             logger.error("GTIN parsing failed")
             return False
     else:
         logger.error("GTIN file not found or invalid")
+        return False
+    
+    # Then Ingredient
+    if 'ingredient' in xml_files:
+        if not parse_ingredient_data(xml_files['ingredient']):
+            logger.error("Ingredient parsing failed")
+            return False
+    else:
+        logger.error("Ingredient file not found or invalid")
+        return False
+    
+    # Then Lookup
+    if 'lookup' in xml_files:
+        if not parse_lookup_data(xml_files['lookup']):
+            logger.error("Lookup parsing failed")
+            return False
+    else:
+        logger.error("Lookup file not found or invalid")
+        return False
+    
+    # Finally VMP Ingredient
+    if 'vmp_ingredient' in xml_files:
+        if not parse_vmp_ingredient_data(xml_files['vmp_ingredient']):
+            logger.error("VMP Ingredient parsing failed")
+            return False
+    else:
+        logger.error("VMP Ingredient file not found or invalid")
         return False
     
     logger.info("All XML files processed successfully")

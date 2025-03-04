@@ -28,11 +28,17 @@ DB_PATH = DATA_DIR / 'dmd_data.db'
 
 # File patterns to process
 FILE_PATTERNS = {
+    'vtm': {'pattern': 'f_vtm2_*.xml', 'schema': SCHEMAS_DIR / 'vtm_v2_3.xsd'},
     'vmp': {'pattern': 'f_vmp2_*.xml', 'schema': SCHEMAS_DIR / 'vmp_v2_3.xsd'},
     'vmpp': {'pattern': 'f_vmpp2_*.xml', 'schema': SCHEMAS_DIR / 'vmpp_v2_3.xsd'},
     'amp': {'pattern': 'f_amp2_*.xml', 'schema': SCHEMAS_DIR / 'amp_v2_3.xsd'},
     'ampp': {'pattern': 'f_ampp2_*.xml', 'schema': SCHEMAS_DIR / 'ampp_v2_3.xsd'},
     'gtin': {'pattern': 'f_gtin2_*.xml', 'schema': SCHEMAS_DIR / 'gtin_v2_0.xsd'},
+    'lookup': {'pattern': 'f_lookup2_*.xml', 'schema': SCHEMAS_DIR / 'lookup_v2_3.xsd'},
+    'ingredient': {'pattern': 'f_ingredient*.xml', 'schema': SCHEMAS_DIR / 'ingredient_v2_3.xsd'},
+    'bnf': {'pattern': 'f_bnf_*.xml', 'schema': SCHEMAS_DIR / 'bnf_v2_3.xsd'},
+    'history': {'pattern': 'f_history_*.xml', 'schema': SCHEMAS_DIR / 'history_v2_3.xsd'},
+    'vtming': {'pattern': 'f_vtming_*.xml', 'schema': SCHEMAS_DIR / 'vtming_v2_3.xsd'},
 }
 
 # Processing config

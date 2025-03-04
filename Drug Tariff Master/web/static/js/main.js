@@ -188,10 +188,28 @@ document.addEventListener('DOMContentLoaded', function() {
             const typeLower = result.type.toLowerCase();
             const typeBadge = `<span class="badge bg-${typeLower}">${result.type}</span>`;
             
+            // Format name with form and route descriptions if available
+            let nameDisplay = highlightSearchTerm(result.name, currentSearch);
+            if (result.form_desc || result.route_desc) {
+                let formRouteText = '';
+                if (result.form_desc) {
+                    formRouteText += result.form_desc;
+                }
+                if (result.route_desc) {
+                    formRouteText += formRouteText ? ` | ${result.route_desc}` : result.route_desc;
+                }
+                if (formRouteText) {
+                    nameDisplay += `<br><small class="text-muted">${formRouteText}</small>`;
+                }
+            }
+            
+            // Use supplier_desc if available, otherwise use supplier code
+            const supplierDisplay = result.supplier_desc || result.supplier || '-';
+            
             row.innerHTML = `
                 <td>${typeBadge}</td>
-                <td>${highlightSearchTerm(result.name, currentSearch)}</td>
-                <td>${result.supplier || '-'}</td>
+                <td>${nameDisplay}</td>
+                <td>${supplierDisplay}</td>
                 <td class="price">${priceDisplay}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary view-details" 
@@ -371,9 +389,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
+            // Skip form, route, and supplier codes if we have descriptions
+            if ((key === 'FORM' && product['FORM_DESC']) || 
+                (key === 'ROUTE' && product['ROUTE_DESC']) || 
+                (key === 'SUPPCD' && product['SUPPLIER_DESC'])) {
+                return;
+            }
+            
+            // Rename description fields for better display
+            let displayKey = key;
+            if (key === 'FORM_DESC') displayKey = 'FORM';
+            if (key === 'ROUTE_DESC') displayKey = 'ROUTE';
+            if (key === 'SUPPLIER_DESC') displayKey = 'SUPPLIER';
+            
             detailsHtml += `
                 <div class="col-md-6 mb-2">
-                    <div class="detail-label">${formatFieldName(key)}</div>
+                    <div class="detail-label">${formatFieldName(displayKey)}</div>
                     <div class="detail-value">${value}</div>
                 </div>
             `;

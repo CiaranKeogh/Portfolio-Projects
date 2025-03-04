@@ -97,8 +97,11 @@ def build_search_index():
             NAME TEXT NOT NULL,
             STRENGTH TEXT,
             FORM TEXT,
+            FORM_DESC TEXT,
             ROUTE TEXT,
+            ROUTE_DESC TEXT,
             SUPPLIER TEXT,
+            SUPPLIER_DESC TEXT,
             PRICE INTEGER,
             SEARCH_TEXT TEXT,
             SEARCH_TERMS TEXT
@@ -120,10 +123,16 @@ def build_search_index():
     
     # Build index from VMP records
     vmp_query = """
-    SELECT VPID as id, 'VMP' as record_type, NM as name,
-           '' as strength, '' as form, 
-           '' as route, NULL as supplier, NULL as price
-    FROM vmp
+    SELECT v.VPID as id, 'VMP' as record_type, v.NM as name,
+           '' as strength, 
+           f.CD as form_cd, f.DESC as form_desc,
+           r.CD as route_cd, r.DESC as route_desc,
+           NULL as supplier, NULL as supplier_desc, NULL as price
+    FROM vmp v
+    LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+    LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+    LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+    LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
     """
     vmp_records = database.execute_query(vmp_query)
     
@@ -135,10 +144,13 @@ def build_search_index():
             # Prepare searchable terms
             name = record['name'] or ""
             strength = record['strength'] or ""
-            form = record['form'] or ""
+            form = record['form_cd'] or ""
+            form_desc = record['form_desc'] or ""
+            route = record['route_cd'] or ""
+            route_desc = record['route_desc'] or ""
             
             # Combine all fields for full text search
-            full_text = f"{name} {strength} {form}".strip()
+            full_text = f"{name} {strength} {form_desc} {route_desc}".strip()
             search_terms = clean_search_term(full_text)
             
             # Extract individual terms for term-based search
@@ -151,8 +163,11 @@ def build_search_index():
                 'NAME': name,
                 'STRENGTH': strength,
                 'FORM': form,
-                'ROUTE': record['route'],
+                'FORM_DESC': form_desc,
+                'ROUTE': route,
+                'ROUTE_DESC': route_desc,
                 'SUPPLIER': record['supplier'],
+                'SUPPLIER_DESC': record['supplier_desc'],
                 'PRICE': record['price'],
                 'SEARCH_TEXT': search_terms,
                 'SEARCH_TERMS': terms_json
@@ -164,9 +179,16 @@ def build_search_index():
     # Build index from VMPP records
     vmpp_query = """
     SELECT vmpp.VPPID as id, 'VMPP' as record_type, 
-           vmpp.NM as name, '' as strength, '' as form,
-           '' as route, NULL as supplier, vmpp.PRICE as price
+           vmpp.NM as name, '' as strength, 
+           f.CD as form_cd, f.DESC as form_desc,
+           r.CD as route_cd, r.DESC as route_desc,
+           NULL as supplier, NULL as supplier_desc, vmpp.PRICE as price
     FROM vmpp
+    LEFT JOIN vmp v ON vmpp.VPID = v.VPID
+    LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+    LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+    LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+    LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
     """
     vmpp_records = database.execute_query(vmpp_query)
     
@@ -178,10 +200,13 @@ def build_search_index():
             # Prepare searchable terms
             name = record['name'] or ""
             strength = record['strength'] or ""
-            form = record['form'] or ""
+            form = record['form_cd'] or ""
+            form_desc = record['form_desc'] or ""
+            route = record['route_cd'] or ""
+            route_desc = record['route_desc'] or ""
             
             # Combine all fields for full text search
-            full_text = f"{name} {strength} {form}".strip()
+            full_text = f"{name} {strength} {form_desc} {route_desc}".strip()
             search_terms = clean_search_term(full_text)
             
             # Extract individual terms for term-based search
@@ -194,8 +219,11 @@ def build_search_index():
                 'NAME': name,
                 'STRENGTH': strength,
                 'FORM': form,
-                'ROUTE': record['route'],
+                'FORM_DESC': form_desc,
+                'ROUTE': route,
+                'ROUTE_DESC': route_desc,
                 'SUPPLIER': record['supplier'],
+                'SUPPLIER_DESC': record['supplier_desc'],
                 'PRICE': record['price'],
                 'SEARCH_TEXT': search_terms,
                 'SEARCH_TERMS': terms_json
@@ -207,9 +235,17 @@ def build_search_index():
     # Build index from AMP records
     amp_query = """
     SELECT amp.APID as id, 'AMP' as record_type, 
-           amp.DESC as name, '' as strength, '' as form,
-           '' as route, amp.SUPPCD as supplier, NULL as price
+           amp.DESC as name, '' as strength, 
+           f.CD as form_cd, f.DESC as form_desc,
+           r.CD as route_cd, r.DESC as route_desc,
+           amp.SUPPCD as supplier, s.DESC as supplier_desc, NULL as price
     FROM amp
+    LEFT JOIN vmp v ON amp.VPID = v.VPID
+    LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+    LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+    LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+    LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+    LEFT JOIN lookup_supplier s ON amp.SUPPCD = s.CD
     """
     amp_records = database.execute_query(amp_query)
     
@@ -221,11 +257,15 @@ def build_search_index():
             # Prepare searchable terms
             name = record['name'] or ""
             strength = record['strength'] or ""
-            form = record['form'] or ""
+            form = record['form_cd'] or ""
+            form_desc = record['form_desc'] or ""
+            route = record['route_cd'] or ""
+            route_desc = record['route_desc'] or ""
             supplier = str(record['supplier']) if record['supplier'] is not None else ""
+            supplier_desc = record['supplier_desc'] or ""
             
             # Combine all fields for full text search
-            full_text = f"{name} {strength} {form} {supplier}".strip()
+            full_text = f"{name} {strength} {form_desc} {route_desc} {supplier_desc}".strip()
             search_terms = clean_search_term(full_text)
             
             # Extract individual terms for term-based search
@@ -238,8 +278,11 @@ def build_search_index():
                 'NAME': name,
                 'STRENGTH': strength,
                 'FORM': form,
-                'ROUTE': record['route'],
+                'FORM_DESC': form_desc,
+                'ROUTE': route,
+                'ROUTE_DESC': route_desc,
                 'SUPPLIER': supplier,
+                'SUPPLIER_DESC': supplier_desc,
                 'PRICE': record['price'],
                 'SEARCH_TEXT': search_terms,
                 'SEARCH_TERMS': terms_json
@@ -251,10 +294,18 @@ def build_search_index():
     # Build index from AMPP records
     ampp_query = """
     SELECT ampp.APPID as id, 'AMPP' as record_type, 
-           ampp.NM as name, '' as strength, '' as form,
-           '' as route, a.SUPPCD as supplier, ampp.PRICE as price
+           ampp.NM as name, '' as strength, 
+           f.CD as form_cd, f.DESC as form_desc,
+           r.CD as route_cd, r.DESC as route_desc,
+           a.SUPPCD as supplier, s.DESC as supplier_desc, ampp.PRICE as price
     FROM ampp
     JOIN amp a ON ampp.APID = a.APID
+    LEFT JOIN vmp v ON a.VPID = v.VPID
+    LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+    LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+    LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+    LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+    LEFT JOIN lookup_supplier s ON a.SUPPCD = s.CD
     """
     ampp_records = database.execute_query(ampp_query)
     
@@ -266,11 +317,15 @@ def build_search_index():
             # Prepare searchable terms
             name = record['name'] or ""
             strength = record['strength'] or ""
-            form = record['form'] or ""
+            form = record['form_cd'] or ""
+            form_desc = record['form_desc'] or ""
+            route = record['route_cd'] or ""
+            route_desc = record['route_desc'] or ""
             supplier = str(record['supplier']) if record['supplier'] is not None else ""
+            supplier_desc = record['supplier_desc'] or ""
             
             # Combine all fields for full text search
-            full_text = f"{name} {strength} {form} {supplier}".strip()
+            full_text = f"{name} {strength} {form_desc} {route_desc} {supplier_desc}".strip()
             search_terms = clean_search_term(full_text)
             
             # Extract individual terms for term-based search
@@ -283,8 +338,11 @@ def build_search_index():
                 'NAME': name,
                 'STRENGTH': strength,
                 'FORM': form,
-                'ROUTE': record['route'],
+                'FORM_DESC': form_desc,
+                'ROUTE': route,
+                'ROUTE_DESC': route_desc,
                 'SUPPLIER': supplier,
+                'SUPPLIER_DESC': supplier_desc,
                 'PRICE': record['price'],
                 'SEARCH_TEXT': search_terms,
                 'SEARCH_TERMS': terms_json
@@ -329,7 +387,9 @@ def search_products(search_term, record_type=None, limit=50):
     
     # Simple search - just look for the term in the NAME field
     sql = """
-    SELECT ID, RECORD_TYPE, NAME, STRENGTH, FORM, ROUTE, SUPPLIER, PRICE
+    SELECT ID, RECORD_TYPE, NAME, STRENGTH, 
+           FORM, FORM_DESC, ROUTE, ROUTE_DESC, 
+           SUPPLIER, SUPPLIER_DESC, PRICE
     FROM search_data
     WHERE NAME LIKE ?
     """
@@ -369,11 +429,20 @@ def search_products(search_term, record_type=None, limit=50):
         if not record_type or record_type == 'AMPP':
             # Try direct search in AMPP table
             ampp_query = """
-            SELECT APPID as ID, 'AMPP' as RECORD_TYPE, NM as NAME,
-                   '' as STRENGTH, '' as FORM, '' as ROUTE, 
-                   '' as SUPPLIER, PRICE
+            SELECT ampp.APPID as ID, 'AMPP' as RECORD_TYPE, ampp.NM as NAME,
+                   '' as STRENGTH, 
+                   f.CD as FORM, f.DESC as FORM_DESC,
+                   r.CD as ROUTE, r.DESC as ROUTE_DESC,
+                   a.SUPPCD as SUPPLIER, s.DESC as SUPPLIER_DESC, ampp.PRICE
             FROM ampp
-            WHERE LOWER(NM) LIKE ?
+            JOIN amp a ON ampp.APID = a.APID
+            LEFT JOIN vmp v ON a.VPID = v.VPID
+            LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+            LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+            LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+            LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+            LEFT JOIN lookup_supplier s ON a.SUPPCD = s.CD
+            WHERE LOWER(ampp.NM) LIKE ?
             ORDER BY PRICE DESC
             LIMIT ?
             """
@@ -385,11 +454,17 @@ def search_products(search_term, record_type=None, limit=50):
         if not results and (not record_type or record_type == 'VMP'):
             # Try direct search in VMP table
             vmp_query = """
-            SELECT VPID as ID, 'VMP' as RECORD_TYPE, NM as NAME,
-                   '' as STRENGTH, '' as FORM, '' as ROUTE, 
-                   '' as SUPPLIER, NULL as PRICE
-            FROM vmp
-            WHERE LOWER(NM) LIKE ?
+            SELECT v.VPID as ID, 'VMP' as RECORD_TYPE, v.NM as NAME,
+                   '' as STRENGTH, 
+                   f.CD as FORM, f.DESC as FORM_DESC,
+                   r.CD as ROUTE, r.DESC as ROUTE_DESC,
+                   NULL as SUPPLIER, NULL as SUPPLIER_DESC, NULL as PRICE
+            FROM vmp v
+            LEFT JOIN vmp_form vf ON v.VPID = vf.VPID
+            LEFT JOIN lookup_form f ON vf.FORMCD = f.CD
+            LEFT JOIN vmp_route vr ON v.VPID = vr.VPID
+            LEFT JOIN lookup_route r ON vr.ROUTECD = r.CD
+            WHERE LOWER(v.NM) LIKE ?
             LIMIT ?
             """
             results = database.execute_query(vmp_query, (search_param, limit))
