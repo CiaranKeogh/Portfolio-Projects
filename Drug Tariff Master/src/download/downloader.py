@@ -4,6 +4,7 @@ import logging
 import requests
 import zipfile
 import shutil
+import re
 from tqdm import tqdm
 
 class DownloadError(Exception):
@@ -159,6 +160,18 @@ def download_dmd_files(api_key, output_dir="data", retry_count=3, retry_delay=30
     """
     Download and extract the NHS Dictionary of Medicines and Devices (dm+d) files.
     
+    This function processes all XML files in the package, including:
+    - f_vmp2_*.xml (Virtual Medicinal Product)
+    - f_vmpp2_*.xml (Virtual Medicinal Product Pack)
+    - f_amp2_*.xml (Actual Medicinal Product)
+    - f_ampp2_*.xml (Actual Medicinal Product Pack)
+    - f_gtin2_*.xml (GTIN mappings)
+    - f_ingredient2_*.xml (Ingredients)
+    - f_lookup2_*.xml (Lookup tables)
+    - f_vtm2_*.xml (Virtual Therapeutic Moieties)
+    
+    Where * is a date or version identifier that may change with each release.
+    
     Args:
         api_key (str): TRUD API key
         output_dir (str): Directory to save files to
@@ -166,7 +179,7 @@ def download_dmd_files(api_key, output_dir="data", retry_count=3, retry_delay=30
         retry_delay (int): Delay between retries in seconds
         
     Returns:
-        dict: Paths to extracted files
+        dict: Paths to extracted files, mapped to standardized names
         
     Raises:
         DownloadError: If download or extraction fails
@@ -198,45 +211,90 @@ def download_dmd_files(api_key, output_dir="data", retry_count=3, retry_delay=30
         extract_dir = os.path.join(output_dir, f"dmd_{release_id}")
         extracted_files = extract_zip(zip_path, extract_dir)
         
-        # Step 4: Look for the required XML files and nested zips
-        files_of_interest = [
-            'f_vmp2.xml', 
-            'f_vmpp2.xml', 
-            'f_amp2.xml', 
-            'f_ampp2.xml'
+        # Step 4: Look for all XML files and nested zips
+        # List of all possible base patterns for dm+d files
+        core_files_base_patterns = [
+            'f_vmp2', 
+            'f_vmpp2', 
+            'f_amp2', 
+            'f_ampp2'
         ]
         
-        # Also look for the nested zip containing f_gtin2.xml
-        gtin_zip_pattern = 'f_gtin2'
+        additional_files_base_patterns = [
+            'f_ingredient2',
+            'f_lookup2',
+            'f_vtm2'
+        ]
+        
+        all_files_base_patterns = core_files_base_patterns + additional_files_base_patterns
+        
+        # Look for the nested zip containing GTIN data
+        gtin_zip_pattern = 'GTIN'
         
         result_files = {}
         
-        # Find and process nested zips
+        # Find and process nested zips for GTIN
         gtin_files = [f for f in extracted_files if gtin_zip_pattern in f and f.endswith('.zip')]
         for gtin_zip in gtin_files:
             gtin_extract_dir = os.path.join(output_dir, f"gtin_{release_id}")
             gtin_extracted = extract_zip(gtin_zip, gtin_extract_dir)
             
-            # Find the f_gtin2.xml file in the extracted files
-            for f in gtin_extracted:
-                if f.endswith('f_gtin2.xml'):
-                    result_files['f_gtin2.xml'] = f
-                    break
+            # Find the f_gtin2.xml file in the extracted files with regex to handle date suffixes
+            gtin_matches = [f for f in gtin_extracted if re.match(r'.*f_gtin2(_\d+)?\.xml$', os.path.basename(f))]
+            if gtin_matches:
+                result_files['f_gtin2.xml'] = gtin_matches[0]
+                logger.info(f"Found GTIN file: {gtin_matches[0]}")
+            else:
+                # Extract nested ZIPs within the GTIN folder if the XML wasn't found directly
+                nested_zips = [f for f in gtin_extracted if f.endswith('.zip')]
+                for nested_zip in nested_zips:
+                    nested_dir = os.path.join(gtin_extract_dir, 'nested')
+                    nested_files = extract_zip(nested_zip, nested_dir)
+                    gtin_matches = [f for f in nested_files if re.match(r'.*f_gtin2(_\d+)?\.xml$', os.path.basename(f))]
+                    if gtin_matches:
+                        result_files['f_gtin2.xml'] = gtin_matches[0]
+                        logger.info(f"Found GTIN file in nested ZIP: {gtin_matches[0]}")
+                        break
         
-        # Process the main XML files
-        for file in files_of_interest:
-            matching_files = [f for f in extracted_files if f.endswith(file)]
+        # Process all XML files with flexible pattern matching
+        # First, find all XML files in the extracted files
+        xml_files = [f for f in extracted_files if f.endswith('.xml')]
+        
+        # Then, process known file patterns
+        for base_pattern in all_files_base_patterns:
+            # Use regex to find files that match the pattern with optional date suffix
+            regex_pattern = f"^{base_pattern}(_\\d+)?\\.xml$"
+            matching_files = [f for f in xml_files if re.match(regex_pattern, os.path.basename(f))]
             if matching_files:
-                result_files[file] = matching_files[0]
+                # Standardize to the basic pattern without date suffix
+                standard_name = f"{base_pattern}.xml"
+                result_files[standard_name] = matching_files[0]
+                logger.info(f"Found {standard_name} file: {matching_files[0]}")
         
-        # Verify we have all required files
-        required_files = files_of_interest + ['f_gtin2.xml']
+        # Also include any other XML files we might have found but not recognized
+        for xml_file in xml_files:
+            basename = os.path.basename(xml_file)
+            # Skip files we've already processed
+            if not any(basename.startswith(pattern) for pattern in all_files_base_patterns):
+                # Use the actual basename as the key
+                result_files[basename] = xml_file
+                logger.info(f"Found additional XML file: {xml_file}")
+        
+        # Verify we have all required core files
+        required_files = [f"{pattern}.xml" for pattern in core_files_base_patterns] + ['f_gtin2.xml']
         missing_files = [f for f in required_files if f not in result_files]
         
         if missing_files:
             logger.warning(f"Missing required files: {missing_files}")
         
+        # Log all found files, categorized by type
+        core_files = [f for f in result_files.keys() if any(f.startswith(pattern) for pattern in core_files_base_patterns) or f == 'f_gtin2.xml']
+        additional_files = [f for f in result_files.keys() if f not in core_files]
+        
+        logger.info(f"Found core files: {core_files}")
+        logger.info(f"Found additional files: {additional_files}")
         logger.info(f"Successfully processed all files: {list(result_files.keys())}")
+        
         return result_files
     
     except Exception as e:

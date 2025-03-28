@@ -16,8 +16,10 @@ This application processes NHS Dictionary of Medicines and Devices (dm+d) data t
 
 - [x] Download functionality to retrieve dm+d files from NHS TRUD
 - [x] Extract nested ZIP files and find required XML files
+- [x] Process all dm+d XML files, not just the required ones
 - [x] Robust error handling and retry logic
 - [x] Logging of download process
+- [x] Handling of date-suffixed filenames (e.g., f_amp2_3200325.xml)
 - [ ] Data parsing and database creation
 - [ ] Price calculation for missing tariff prices
 - [ ] Search functionality
@@ -76,6 +78,34 @@ Additional options:
 --retry-delay SECONDS   Delay between retries in seconds (default: 300)
 ```
 
+### Handling of File Versioning
+
+The NHS TRUD service provides files with date or version suffixes in the filenames (e.g., `f_amp2_3200325.xml`). The download module automatically handles these varying filenames by:
+
+1. Using regular expressions to identify files regardless of their date suffix
+2. Standardizing filenames internally to a consistent format (e.g., `f_amp2.xml`)
+3. Maintaining a mapping between standardized names and actual files on disk
+
+This approach ensures the application will continue to work correctly with future releases that might use different date or version suffixes.
+
+### Complete Data Processing
+
+The application processes all XML files in the dm+d package, including:
+
+- Core files required for pricing functionality:
+  - `f_vmp2_*.xml` (Virtual Medicinal Product)
+  - `f_vmpp2_*.xml` (Virtual Medicinal Product Pack)
+  - `f_amp2_*.xml` (Actual Medicinal Product)
+  - `f_ampp2_*.xml` (Actual Medicinal Product Pack)
+  - `f_gtin2_*.xml` (GTIN mappings)
+
+- Additional files for enhanced functionality:
+  - `f_ingredient2_*.xml` (Ingredients)
+  - `f_lookup2_*.xml` (Lookup tables)
+  - `f_vtm2_*.xml` (Virtual Therapeutic Moieties)
+
+This comprehensive approach ensures that all data from the dm+d package is available for advanced features and analysis.
+
 ## Detailed Code Architecture
 
 ### Project Structure
@@ -116,7 +146,9 @@ Drug Tariff Master/
 2. Downloads the main ZIP file
 3. Extracts XML files from the main archive
 4. Finds and processes the nested ZIP containing GTIN data
-5. Returns paths to all required extracted files
+5. Uses regex pattern matching to locate files regardless of date suffixes
+6. Processes both core files and additional files from the dm+d package
+7. Returns paths to all extracted files with standardized names
 
 #### 2. Configuration Module (`config/`)
 
@@ -158,6 +190,9 @@ Will parse XML files into a SQLite database with tables for:
 - AMP (Actual Medicinal Product)
 - AMPP (Actual Medicinal Product Pack)
 - GTIN (Global Trade Item Number)
+- Ingredient (Ingredient details)
+- Lookup (Reference data)
+- VTM (Virtual Therapeutic Moieties)
 
 ### 2. Price Calculation
 
@@ -172,6 +207,7 @@ Will create a unified search table joining all product information with:
 - Product relationships established
 - Brand/Generic classification
 - Price information with calculation method
+- Therapeutic classification and ingredient information
 
 ## API Reference
 
@@ -205,6 +241,7 @@ Logs are stored in the `logs/` directory with timestamps for each session. The l
 - Warning messages for non-critical issues
 - Error messages for failures
 - Detailed information about download progress
+- Categorized lists of core and additional files processed
 
 ## Next Steps
 
@@ -213,7 +250,7 @@ Future development will include:
 1. Parsing XML files into a SQLite database
    - Implementation of XSD validation
    - Creation of tables with proper relationships
-   - Extraction of relevant fields
+   - Extraction of relevant fields from all downloaded XML files
 
 2. Implementing price calculation logic based on the PRD rules
    - Initial price assignment from PRICE_INFO and DTINFO
@@ -225,6 +262,7 @@ Future development will include:
    - Joining data across product tables
    - Implementing Brand/Generic classification
    - Creating indexes for efficient searches
+   - Incorporating therapeutic and ingredient information
 
 4. Developing expanded CLI/API
    - Commands for searching products
