@@ -1,0 +1,138 @@
+Project Overview
+
+The goal is to create an automated system that processes NHS Dictionary of Medicines and Devices (dm+d) data to match Actual Medicinal Product Packs (AMPP) to Virtual Medicinal Product Packs (VMPP) and Global Trade Item Numbers (GTIN) to AMPP. The system will also calculate missing drug tariff prices based on similar products.
+
+MVP
+
+Download Handling
+
+Source: NHS England TRUD service (NHSBSA dm+d).
+You need to download the ZIP file for dm+d to get access to the required “files to download”, this can be done by the following:
+Go to: https://isd.digital.nhs.uk/trud/api/v1/keys/INSERT_API_KEY/items/24/releases?latest
+Extract the archiveFileUrl from the releases[0] object in the JSON that’s returned. This will download the ZIP file for processing. 
+
+Files to Download:
+
+f_vmp2.xml (Virtual Medicinal Product)
+
+f_vmpp2.xml (Virtual Medicinal Product Pack)
+
+f_amp2.xml (Actual Medicinal Product)
+
+f_ampp2.xml (Actual Medicinal Product Pack)
+
+f_gtin2.xml (GTIN mappings)
+
+f_lookup.xml (Lookup Data - New Requirement)
+
+Automation:
+
+Obtain an API key from TRUD to access the files.
+
+Manually download and process the files initially.
+
+Error Handling:
+
+Retry failed downloads up to 3 times with a 5-minute delay between attempts.
+
+Log errors to a file (e.g., logs/download.log) for troubleshooting.
+
+Database Creation & Relationships
+
+Convert the downloaded XML files into an SQLite database.
+
+Tables: vmp, vmpp, amp, ampp, gtin, lookup, vtm.
+
+Implement relationships:
+
+vmp.VPID → vmpp.VPID (one-to-many).
+
+vmp.VPID → amp.VPID (one-to-many).
+
+vmpp.VPPID → ampp.VPPID (one-to-many).
+
+amp.APID → ampp.APID (one-to-many).
+
+ampp.APPID → gtin.AMPPID (one-to-many).
+
+New Relationships:
+
+vtm.VTMID → vmp.VTMID (one-to-many).
+
+vmp.VTMID → vtm.VTMID (many-to-one).
+
+vmp.VPID → amp.VPID (one-to-many).
+
+amp.APID → vmp.VPID (many-to-one).
+
+amp.APID → ampp.APID (one-to-many).
+
+ampp.APID → amp.APID (many-to-one).
+
+vmp.VPID → vmpp.VPID (one-to-many).
+
+vmpp.VPID → vmp.VPID (many-to-one).
+
+vmpp.VPPID → ampp.VPPID (one-to-many).
+
+ampp.VPPID → vmpp.VPPID (many-to-one).
+
+Lookup Data Handling
+
+Utilize the "lookup" workshop to populate data fields where appropriate, ensuring better data accuracy and completeness.
+
+Join tables using SQL joins to build the search_data table.
+
+Searchability
+
+Implement search functionality with indexes on key fields: Description, AMPP, VPPID, VMPP, VMP.
+
+Post-MVP Phase One: Pricing Engine
+
+Pricing Calculation
+
+Fill in missing prices based on AMPP & VMPP relationships using calculated methods such as:
+
+Same VMPP (Average price calculation for similar products).
+
+Same VMP (Fallback calculation using price per unit estimation).
+
+Store results in the database with tracking columns: PRICE_SOURCE, PRICE_METHOD.
+
+Post-MVP Phase Two: Web UI
+
+Interface Development
+
+Create a web-based UI for interaction with the database.
+
+Search interface to query the search_data table.
+
+Display relevant data fields with filtering and sorting options.
+
+Post-MVP Phase Three: Automation
+
+Automated Downloads
+
+Automate the download of NHS dm+d files weekly (every Monday at 02:00 UTC) using a cron job or scheduler.
+
+Store files in a designated directory, overwriting previous versions with each update.
+
+Maintain logs for troubleshooting and performance monitoring.
+
+Assumptions & Considerations
+
+The f_gtin2 file is nested within an additional ZIP file that needs processing.
+
+API keys for TRUD and Google Gemini must be kept secure.
+
+Parsing will be done in chunks of 1,000 records for efficiency.
+
+XSDs will be used for structure validation during data ingestion.
+
+Future Enhancements
+
+Implement advanced analytics and reporting features.
+
+Add support for additional input formats beyond XML.
+
+Improve user interface with advanced filtering and visualization tools.

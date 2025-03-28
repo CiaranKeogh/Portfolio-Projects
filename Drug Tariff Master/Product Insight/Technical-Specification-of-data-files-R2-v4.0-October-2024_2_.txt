@@ -1,0 +1,594 @@
+
+
+
+
+
+
+
+
+
+
+NHS dictionary of medicines and devices (dm+d)
+Technical specification of data files for Release 2 of the dictionary of medicines and devices (dm+d)
+
+Release 2.0 Version 4.0
+October 2024
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+This document is produced and maintained by NHS Business Services Authority in partnership with NHS England.
+
+
+
+Document control since 2013
+
+VersionDate issuedBrief summary of changeAmended / Approved by07/08/2013Release 2.0 Version 3.0Extract Format amended to include GTIN zip file
+Supplementary files amended to reflect removal of GTIN content
+GTINs to be 13 or 14 characters in length
+Reference to CSM amended to EMA
+Reference to ZERO_DISCD amended to DND
+Former Appendix C GTIN TAG Name and associated details revised and incorporated into Appendix ANHSBSA
+May 2015Release 2.0 Version 3.1Partition of document control with the historical records prior to 2013 now located in Annex I towards the end of the documentNHSBSA
+Jan 2023Release 2.0
+Version 3.2Added XML structure for dm+d historic codesNHSBSASept 2024Release 2.0
+Version 3.3Added XML structure for Ingredients at VTM file as a Supplementary file.
+Clarification of SNOMED CT identifier as either only UK extension or International or UK extension.
+Reference to Actual product excipient data no longer being populated added as a footnote.NHSBSA / NHS EnglandOctober 2024Release 2.0
+Version 4.0Version number only corrected - version 3.3 should have been titled version 4.0NHSBSA / NHSE
+
+
+
+
+
+
+Contents
+1	Introduction	4
+2	dm+d Release 2 Database Structure	4
+2.1	dm+d Release 2 Extract Timetable	6
+2.2	dm+d Release 2 Extract Files (General)	6
+3	Extract Format	7
+3.1	Access to Extract	8
+3.2	Implementation Guidelines	8
+4	Supplementary Files	8
+Appendix A - Detailed Description of XML Files	9
+VTM	9
+VMP	10
+AMP	15
+VMPP	18
+AMPP	20
+Ingredient	24
+Lookup	25
+GTIN	32
+Appendix B - Detailed description of Supplementary XML files	33
+BNF/ATC	33
+Historic Codes	34
+VTM Ingredient	37
+Annex I	38
+Historical Issue Sheet	38
+Document control prior to 2013	38
+
+
+1	Introduction
+
+This document identifies the technical specifications of the data files for distributing the information contained in Release 2 of the dictionary of medicines and devices (dm+d).
+
+It will describe the form and the format of the files, how they can be accessed and how they need to be processed in order to create a useable database and ensure data integrity. 
+
+2	dm+d Release 2 Database Structure
+
+The dm+d Release 2 database consists of five major concept areas and a number of ancillary support areas and is fully described in the documents 'NHS dictionary of medicines and devices Data Model' and NHS dictionary of medicines and devices Editorial Policy.
+
+The basic structure of the database is1:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The 5 main concepts are:
+
+-		  Virtual Therapeutic Moiety (VTM)
+-	Virtual Medicinal Product (VMP)
+-	Actual Medicinal Product (AMP)
+-	Virtual Medicinal Product Pack (VMPP)
+-	Actual Medicinal Product Pack (AMPP)
+
+The cardinality on the diagram depicts:
+
+-	Each VTM can have many VMP's associated
+-	Each VMP can be related to a single VTM
+
+-	Each VMP can have many AMP's associated
+-	Each AMP is related to a single VMP
+
+-	Each AMP can have many AMPP's associated
+-	Each AMPP is related to a single AMP
+
+-	Each VMP can have many VMPP's associated
+-	Each VMPP is related to a single VMP
+
+-	Each VMPP can have many AMPP's associated
+-	Each AMPP is related to a single VMPP
+
+Two extra areas have been identified to hold common data:
+
+-	Ingredients (shown in the diagram as Virtual Product Ingredient and Actual Product Excipient).
+
+-	Lookup (these are items held as codes within the model but with a narrative meaning e.g. Virtual medicinal product prescribing status is stored as 1 or 2 but these values relate to "Valid as a prescribable product" and "Invalid to prescribe in NHS primary care" respectively).Other values are available, see lookup file for the complete list.
+
+2.1	dm+d Release 2 Extract Timetable
+
+Once a week a full extract of the database will be published. This will be in a zipped format in order to minimise the download time. The data will be available for download from TRUD (Home - TRUD (digital.nhs.uk)2. This is a service provided by NHS England.
+
+2.2	dm+d Release 2 Extract Files (General)
+
+All files extracted from the database will be in XML format (.xml) and will be provided with an associated schema file (.xsd) that describes the format of the XML file and can be used to validate the XML file structure.
+
+There will be a total of 7 XML files and associated schemas made available as per the agreed timetable.
+
+3	Extract Format
+
+Each week 7 files (and 1 further GTIN zip file, see note below) will be extracted relating to the following areas of the database:
+
+- Virtual Therapeutic Moieties File (will contain all VTM's)
+
+-	Virtual Medicinal Product File (will contain all VMP's)
+
+-	Actual Medicinal Product File (will contain all AMP's)
+
+-	Virtual Medicinal Product Pack File (will contain all VMPP's) 
+
+-	Actual Medicinal Product Pack File (will contain all AMPP's) 
+
+-	Ingredient File (will contain all ingredients associated with active VMP's and AMP's)
+
+-	Lookup File (will contain descriptions of all items that are held as codes in the other files).
+
+A full description of these files is given in appendix A.
+
+This set of files represents the entire data population of the dictionary at a specific point in time and must be combined to give a true image of the database.
+
+In order to maintain referential integrity within the target database the files need to be loaded in the following order:
+
+i)	Lookup/Ingredient
+
+ii)	VTM
+
+iii)	VMP
+
+iv)	AMP/VMPP
+
+ v)	AMPP
+
+Within the VMPP and AMPP files there are entries relating to combination packs that will require loading after the main VMPPs and AMPPs are populated.
+
+This order assumes that the target database is being populated from scratch each time and that the structure is not significantly different to the dm+d Release 2 model.
+
+Please note the extract will also contain a GTIN zip file that was previously available in the Supplementary Files. This is also presented as an XML file with an associated schema.
+
+
+3.1	Access to Extract
+
+The XML extracts and associated schema files will be available for download from the TRUD download site on a page secured by username and password. A username and password will be distributed to those allowed access to the files.
+
+3.2	Implementation Guidelines
+
+The following guidelines should be noted:
+
+-	No additions or deletions should be made to the data set.
+
+-	None of the information within the data set should be altered.
+
+- In order to achieve a standard coding system the supplied SNOMED CT identifiers should be used within suppliers' systems throughout the prescribing and dispensing process as well as for reimbursement and subsequent information provision.  Any mapping to existing coding systems is the responsibility of the suppliers.
+
+4	Supplementary Files
+
+In addition to the dm+d files there is a set of supplementary files produced that provides details of:
+* BNF and ATC information relating to VMPs
+o AMP to BNF and ATC mapping information is no longer released.
+* Historic data files: contains all previous codes for dm+d concepts that have a previous ID or Code (VTM; VMP; Ingredients; Form; Route; Supplier; Units of Measure).
+* VTM Ingredient file - From 2023 VTM IDs were updated to utilise the "Medicinal product containing only" concepts where there is an existing SNOMED CT International concept. From Q4 2024 ingredients will be populated for VTMs and available as a dm+d supplementary xml file from TRUD
+
+The supplementary files are produced to the same timetable as the dm+d files and is also presented as XML files with associated schema files.
+
+The supplementary files, when loaded, have a dependency on the pre-existence of dm+d data and as such should be loaded after the main dm+d files. 
+
+
+Appendix A - Detailed Description of XML Files
+(Including GTIN file)
+
+Conventions used in tag naming.
+
+DT = date in format CCYY-MM-DD
+CD = from lookup
+NM = name
+ID = key field pointing to another tag on same or different file
+
+VTM
+
+TAG NameOptionalDescription<VIRTUAL_THERAPEUTIC_MOIETIES>Root Node<VTM>Individual Virtual Therapeutic Moiety (VTM) (this collection of tags will occur for each VTM)<VTMID>Virtual Therapeutic Moiety identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 integers<INVALID>YInvalidity flag. If set to 1 indicates this is an invalid entry in file.
+1 integer only<NM>        Virtual Therapeutic Moiety Name
+Up to a maximum of  255 characters<ABBREVNM>YVirtual Therapeutic Moiety Abbreviated name
+Up to a maximum of  60 characters<VTMIDPREV>YPrevious VTM identifier  (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<VTMIDDT>YVirtual Therapeutic Moiety Identifier date - Date the VTM identifier became Valid
+Always 10 characters</VTM>End Tag</VIRTUAL_THERAPEUTIC_MOIETIES>End Tag
+
+
+VMP
+
+TAG NameOptionalDescription<VIRTUAL_MED_PRODUCTS>Root Node<VMPS>Collection of VMP's<VMP>Individual Virtual Medicinal Product (VMP) (this collection of tags will occur for each VMP)<VPID>Virtual Medicinal Product identifier (SNOMED CT UK extension ID3)
+Up to a maximum of 18 digits<VPIDDT>YDate VMP identifier became Valid
+Always 10 characters<VPIDPREV>YPrevious product  identifier (SNOMED CT International3 or UK extension ID)
+Up to a maximum of 18 digits<VTMID>YVTM identifier (SNOMED CT International or UK extension ID). Can be located in VTM file. 
+Up to a maximum of 18 integers<INVALID>YInvalidity flag - If set to 1 indicates this is an invalid entry in file.
+1 digit only<NM>Virtual Medicinal Product Name
+Up to a maximum of 255 characters<ABBREVNM>YVirtual Medicinal Product Abbreviated name
+Up to a maximum of 60 characters<BASISCD>Basis of preferred name - Name basis code narrative can be located in lookup file under tag <BASIS_OF_NAME>
+Always 4 digits<NMDT>YDate of Name applicability
+Always 10 characters<NMPREV>YPrevious Name
+Up to a maximum of 255 characters<BASIS_PREVCD>YBasis of previous name -  code narrative can be located in lookup file under tag <BASIS_OF_NAME>
+Always 4 digits<NMCHANGECD>YReason for name change - code narrative can be located in lookup file under tag <NAMECHANGE_REASON>
+Always 4 digits<COMBPRODCD>YCombination product Indicator - code narrative can be located in lookup file under tag <COMBINATION_PROD_IND>
+Always 4 digits<PRES_STATCD>Virtual Medicinal Product Prescribing Status - Prescribing Status code narrative can be located in lookup file under tag <VIRTUAL_PRODUCT_PRES_STATUS>
+Always 4 digits<SUG_F>YSugar Free Indicator (present and set to 1 if sugar free)
+1 digit only<GLU_F>YGluten Free Indicator (present and set to 1 if gluten free)
+1 digit only<PRES_F>YPreservative Free Indicator (present and set to 1 if preservative free)
+1 digit only<CFC_F>YCFC Free Indicator (present and set to 1 if CFC free)
+1 digit only<NON_AVAILCD>YNon-availability indicator -  code narrative can be located in lookup file under tag <VIRTUAL_PRODUCT_NON_AVAIL>
+Always 4 digits<NON_AVAILDT>YNon availability status date
+Always 10 characters<DF_INDCD>YDose form indicator. Narrative can be located in lookup file under <DF_INDICATOR>
+1 digit only<UDFS>YUnit dose form size - Numerical value relating to size of entity. This will only be present if the unit dose form attribute is 'discrete.'
+Up to a maximum of 10 digits and 3 decimal places<UDFS_UOMCD>YUnit dose form units - Unit of Measure code relating to the size. This will only be present if the unit dose form attribute is 'discrete.' Narrative can be located in lookup file under tag <UNIT_OF_MEASURE>
+Up to a maximum of 18 digits<UNIT_DOSE_UOMCD>YUnit dose unit of measure - Unit of Measure code relating to a description of the entity that can be handled. This will only be present if the Unit dose form attribute is 'discrete.' Narrative can be located in lookup file under tag <UNIT_OF_MEASURE>
+Up to a maximum of 18 digits</VMP> End Tag</VMPS> End Tag<VIRTUAL_PRODUCT_INGREDIENT>Virtual Product Ingredient tags.<VPI>Ingredients associated with each VMP (this collection of tags will occur for each VMP/ingredient relationship) <VPID>VMP identifier (As above in VMP tag)
+Up to a maximum of 18 digits<ISID>Ingredient substance identifier (SNOMED CT International or UK extension ID) can be located in ingredient file.
+Up to a maximum of 18 digits<BASIS_STRNTCD>YBasis of pharmaceutical strength - code narrative can be located in lookup file under tag <BASIS_OF_STRNTH>
+Always 4 digits<BS_SUBID>YBasis of strength substance identifier  (SNOMED CT International or UK extension ID) can be located in ingredient file
+Up to a maximum of 18 digits<STRNT_NMRTR_VAL>YStrength value numerator - Value of numerator element of strength
+Up to a maximum of 10 digits and 3 decimal places<STRNT_NMRTR_UOMCD>YStrength value numerator unit - Numerator value of strength Unit of Measure code. Narrative can be located in lookup file under tag <UNIT_OF_MEASURE>
+Up to a maximum of 18 digits<STRNT_DNMTR_VAL>YStrength value denominator - Value of denominator element of strength
+Up to a maximum of 10 digits and 3 decimal places<STRNT_DNMTR_UOMCD>YStrength value denominator unit - Denominator value of strength Unit of Measure code. Narrative can be located in lookup file under tag <UNIT_OF_MEASURE>
+Up to a maximum of 18 digits</VPI>End Tag</VIRTUAL_PRODUCT_INGREDIENT>End Tag<ONT_DRUG_FORM>Ontology Form & Route information associated with each VMP<ONT>Ontology Form & Route associated with each VMP (this collection of tags will occur for each VMP/formulation route relationship) <VPID>VMP ID (as above in VMP tag)
+Up to a maximum of 18 digits<FORMCD>Virtual Medicinal Product Form & Route - code, narrative can be located in lookup file under tag <ONT_FORM_ROUTE>
+Always 4 characters</ONT>End Tag</ONT_DRUG_FORM>End Tag<DRUG_FORM>Formulation or Form associated with each VMP<DFORM>Formulation associated with each VMP (this collection of tags will occur for each VMP/formulation relationship) <VPID>VMP identifier (as above in VMP tag)
+Up to a maximum of 18 digits<FORMCD>Formulation code, narrative can be located in lookup file under tag <FORM>
+Up to a maximum of 18 digits</DFORM>End Tag</DRUG_FORM>End Tag<DRUG_ROUTE>Routes associated with each VMP<DROUTE>Route associated with each VMP (this collection of tags will occur for each VMP/route relationship)<VPID>VMP identifier (as above in VMP tag)
+Up to a maximum of 18 digits<ROUTECD>Route code, narrative can be located in lookup file under tag <ROUTE>
+Up to a maximum of 18 digits</DROUTE>End Tag</DRUG_ROUTE>End Tag<CONTROL_DRUG_INFO>Control Drug Information associated with each VMP
+<CONTROL_INFO>Control Drug Information associated with each VMP (this collection of tags will occur for each VMP/control drug information relationship)<VPID>VMP identifier (as above in VMP tag)
+Up to a maximum of 18 digits<CATCD>Control Drug category - , narrative can be located in lookup file under tag <CONTROL_DRUG_CATEGORY>
+Always 4 digits<CATDT>YDate of applicability
+Always 10 characters<CAT_PREVCD>YPrevious Control Drug Information - 'Controlled Drug category prior to change date' - narrative can be located in lookup file under tag <CONTROL_DRUG_CATEGORY>
+Always 4 digits</CONTROL_INFO>End Tag</CONTROL_DRUG_INFO>End Tag</VIRTUAL_MED_PRODUCTS>End Tag
+
+AMP
+
+TAG NameOptionalDescription<ACTUAL_MEDICINAL_PRODUCTS>Root Node<AMPS>Collection of AMP's<AMP>Individual Actual Medicinal Product (AMP) (this collection of tags will occur for each AMP)<APID>AMP identifier (SNOMED CT UK extension ID)
+Up to a maximum of 18 digits<INVALID>YInvalidity flag - If set to 1 indicates this is an invalid entry in file.
+1 digit only<VPID>VMP identifier, points to parent Virtual Medicinal Product on VMP file
+Up to a maximum of 18 digits<NM>Actual Medicinal Product Name
+Up to a maximum of 255 characters<ABBREVNM>YActual Medicinal Product Abbreviated name
+Up to a maximum of 60 characters<DESC>Actual Medicinal Product Description
+Up to a maximum of 700 characters<NMDT>YDate of name applicability
+Always 10 characters<NM_PREV> YPrevious Name
+Up to a maximum of 255 characters<SUPPCD>Supplier - Supplier Code, narrative can be located in lookup file under tag <SUPPLIER>
+Up to a maximum of 18 digits<LIC_AUTHCD>Current Licensing Authority - Licensing Authority Code, narrative can be located in lookup file under tag <LICENSING_AUTHORITY>
+Always 4 digits<LIC_AUTH_PREVCD>YPrevious Licensing Authority Code, narrative can be located in lookup file under tag <LICENSING_AUTHORITY>
+Always 4 digits<LIC_AUTHCHANGECD>YReason for change of licensing authority code, narrative can be located in lookup under tag  <LICENSING_AUTHORITY_CHANGE_REASON>
+Always 4 digits<LIC_AUTHCHANGEDT>YDate of change of licensing authority
+Always 10 characters<COMBPRODCD>YCombination product indicator Code, narrative can be located in lookup file under tag <COMBINATION_PROD_IND>
+Always 4 digits<FLAVOURCD>YFlavour Code, narrative can be located in lookup file under tag <FLAVOUR>
+Always 4 digits<EMA>YEMA Additional Monitoring indicator - will be present and set to 1 if true
+1 digit only<PARALLEL_IMPORT>YParallel Import indicator  - will be present and set to 1 if true
+1 digit only<AVAIL_RESTRICTCD>Restrictions on availability Code, narrative can be located in lookup file under tag <AVAILABILITY_RESTRICTION>
+Always 4 digits</AMP>End Tag</AMPS>    End Tag<AP_INGREDIENT>4	Actual Product Excipients - AMP ingredients (excipients)<AP_ING>AMP excipients - this collection of tags will occur for each AMP/Ingredient relationship<APID>Actual Product (AMP) identifier
+Up to a maximum of 18 digits<ISID>Ingredient substance identifier (can be located in ingredient file)
+Up to a maximum of 18 digits<STRNTH>YPharmaceutical strength numerical value - strength value
+Up to a maximum of 10 digits and 3 decimal places<UOMCD>YPharmaceutical Strength Unit of Measure code, narrative can be located in lookup file under tag <UNIT_OF_MEASURE>
+Up to a maximum of 18 digits</AP_ING>End Tag</AP_INGREDIENT>End Tag<LICENSED_ROUTE>Licensed route for AMP's<LIC_ROUTE>AMP licensed routes - this collection of tags will occur for each AMP/route relationship<APID>AMP identifier
+Up to a maximum of 18 digits<ROUTECD>Licenced route - Route Code, narrative can be located in lookup file under tag <ROUTE>
+Up to a maximum of 18 digits</LIC_ROUTE>	End Tag</LICENSED_ROUTE>End Tag<AP_INFORMATION>Appliance product information<AP_INFO>Appliance information<APID>AMP identifier
+Up to a maximum of 18 digits<SZ_WEIGHT>YSize / Weight
+Up to a maximum of 100 characters<COLOURCD>YColour code, narrative can be located in lookup file under tag <COLOUR>
+Always 4 digits<PROD_ORDER_NO>YProduct order number - Order number of product within Drug Tariff
+Up to a maximum of 20 characters </AP_INFO>End Tag</AP_INFORMATION>End Tag</ACTUAL_MEDICINAL_PRODUCTS>End Tag
+
+VMPP
+
+TAG NameOptionalDescription<VIRTUAL_MED_PRODUCT_PACK>Root Node<VMPPS>Collection Of VMPP's<VMPP>  Individual Virtual Medicinal Product Packs (VMPP) - this collection of tags will occur for each VMPP<VPPID>Virtual Medicinal Product Pack Identifier (SNOMED CT UK extension ID)
+Up to a maximum of 18 digits<INVALID>YInvalidity flag - If set to 1 indicates this is an invalid entry in file.
+1 digit only<NM>Virtual medicinal product pack description - Name
+Up to a maximum of 420 characters<VPID>VMP identifier - refers to parent VMP in VMP file
+Up to a maximum of 18 digits<QTYVAL>YQuantity Value
+Up to a maximum of 10 digits and 2 decimal places<QTY_UOMCD>YQuantity Unit of Measure code, narrative can be located in lookup file under tag <UNIT_OF_MEASURE>
+Up to a maximum of 18 digits<COMBPACKCD>YCombination pack indicator - Combination pack code, narrative can be located in lookup file under tag <COMBINATION_PACK_IND>
+Always 4 digits</VMPP> End Tag</VMPPS>End Tag<DRUG_TARIFF_INFO>Drug Tariff Category Information<DTINFO>Drug tariff info for VMPP - this collection of tags will occur for each VMPP/drug Tariff combination<VPPID>VMPP identifier (as above in VMPP tag)
+Up to a maximum of 18 digits<PAY_CATCD>Drug Tariff payment category code, narrative can be located in lookup file under tag <DT_PAYMENT_CATEGORY>
+Always 4 digits<PRICE>YDrug Tariff Price
+Up to a maximum of 6 integers<DT>YDate from which DT price is applicable
+Always 10 characters<PREVPRICE>YPrevious price
+Up to a maximum of 6 integers</DTINFO>End Tag</DRUG_TARIFF_INFO>  End Tag<COMB_CONTENT>Combination Pack content<CCONTENT>Combination pack pairs - this collection of tags will occur for each combination pack <PRNTVPPID>VMPP identifier for parent pack
+Up to a maximum of 18 digits<CHLDVPPID>Constituent virtual product pack identifier -  VMPP identifier for sub pack
+Up to a maximum of 18 digits</CCONTENT>End Tag</COMB_CONTENT>End Tag</VIRTUAL_MED_PRODUCT_PACK>End Tag
+
+AMPP
+
+TAG NameOptionalDescription<ACTUAL_MEDICINAL_PROD_PACKS>Actual Medicinal Product Packs<AMPPS>All Actual Medicinal Product Packs<AMPP>This collection of tags will repeat for each AMPP<APPID>YAMPP identifier (SNOMED CT UK extension ID)
+Up to a maximum of 18 digits<INVALID>YInvalidity flag - If set to 1 indicates this is an invalid entry in file.
+1 digit only<NM>   Actual Medicinal Product Pack description
+Up to a maximum of 774 characters<ABBREVNM>   YActual Medicinal Product Pack Abbreviated Name
+Up to a maximum of 60 characters<VPPID>VMPP identifier (reference back to parent VMPP on VMPP file)
+Up to a maximum of 18 digits<APID>AMP identifier  (reference back to parent AMP on AMP file)
+Up to a maximum of 18 digits<COMBPACKCD>YCombination pack Indicator code, narrative can be located in lookup file under tag <COMBINATION_PACK_IND>
+Always 4 digits<LEGAL_CATCD>Legal category code, narrative can be located in lookup file under tag <LEGAL_CATEGORY>
+Always 4 digits<SUBP>YSub Pack Info
+Up to a maximum of 30 characters<DISCCD>YDiscontinued Flag code, narrative can be located in lookup file under tag <DISCONTINUED_IND>
+Always 4 digits<DISCDT>YDiscontinued Flag Change date - Date of discontinuation
+Always 10 characters</AMPP>End Tag</AMPPS>End Tag<APPLIANCE_PACK_INFO>Appliance pack Information.<PACK_INFO>This collection of tags will occur for each AMPP appliance pack information relationship<APPID>AMPP identifier as in AMPP tag above
+Up to a maximum of 18 digits<REIMB_STATCD>Appliance Reimbursement status code, narrative can be located in lookup file under tag <REIMBURSEMENT_STATUS>
+Always 4 digits<REIMB_STATDT>YDate Appliance reimbursement status became effective.
+Always 10 characters<REIMB_STATPREVCD>YAppliance Reimbursement previous status code, narrative can be located in lookup file under tag <REIMBURSEMENT_STATUS>
+Always 4 digits<PACK_ORDER_NO>YPack order number - Order number of pack within Drug Tariff
+Up to a maximum of 20 characters</PACK_INFO>End Tag</APPLIANCE_PACK_INFO>End Tag<DRUG_PRODUCT_PRESCRIB_INFO>Product Prescribing Information<PRESCRIB_INFO>This collection of tags will exist for every AMPP/Prescribing information relationship<APPID>AMPP identifier
+Up to a maximum of 18 digits<SCHED_2>YSchedule 2 indicator - will be present and set to 1 if true
+1 digit only<ACBS>YACBS indicator - will be present and set to 1 if true
+1 digit only<PADM>YPersonally Administered indicator - will be present and set to 1 if true
+1 digit only<FP10_MDA>YFP10 MDA Prescription indicator - will be present and set to 1 if true
+1 digit only<SCHED_1>YSchedule 1 indicator - will be present and set to 1 if true
+1 digit only<HOSP>YHospital indicator - will be present and set to 1 if true
+1 digit only<NURSE_F>YNurse Formulary indicator - will be present and set to 1 if true
+1 digit only<ENURSE_F>The Nurse Extended Formulary was discontinued in 2006. This indicator is no longer populated in dm+d. The data field will persist but remains blank.<DENT_F>YDental Formulary indicator - will be present and set to 1 if true
+1 digit only</PRESCRIB_INFO>End Tag</DRUG_PRODUCT_PRESCRIB_INFO>End Tag<MEDICINAL_PRODUCT_PRICE>Medicinal product price - AMPP Price<PRICE_INFO>This collection of tags will occur for each Actual Medicinal Product Pack (AMPP) Price relationship<APPID>AMPP identifier
+Up to a maximum of 18 digits<PRICE> YPrice
+Up to a maximum of 9 integers<PRICEDT>YDate of price validity - Date of price applicability
+Always 10 characters<PRICE_PREV> YPrice prior to change date - Previous Price
+Up to a maximum of 9 integers<PRICE_BASISCD>Price basis flag - Basis of price code, narrative can be located in lookup file under tag <PRICE_BASIS>
+Always 4 digits</PRICE_INFO>End Tag</MEDICINAL_PRODUCT_PRICE>End Tag<REIMBURSEMENT_INFO>AMPP reimbursement Information<REIMB_INFO>This collection of tags will occur for each AMPP/reimbursement info relationship<APPID> AMPP identifier
+Up to a maximum of 18 digits<PX_CHRGS>YPrescription Charges
+Up to a maximum of 2 digits<DISP_FEES>YDispensing Fees
+Up to a maximum of 2 digits<BB>YBroken Bulk indicator will be present and set to 1 if true
+1 digit only<LTD_STAB>The Drug Tariff no longer identifies products for this purpose. Therefore this indicator is no longer populated in dm+d. The data field will persist but remains blank.<CAL_PACK>YCalendar pack indicator will be present and set to 1 if true
+1 digit only<SPEC_CONTCD> YSpecial Container Indicator code, narrative can be located in lookup file under tag <SPEC_CONT>
+Always 4 digits<DND> YDiscount Not Deducted Indicator (previously Zero Discount Indicator) 
+Always 4 digits<FP34D>YFP34D prescription item indicator will be present and set to 1 if true
+1 digit only</REIMB_INFO>End Tag</REIMBURSEMENT_INFO>End Tag<COMB_CONTENT>Combination Pack content<CCONTENT>Combination pack pairs - this collection of tags will occur for each combination pack <PRNTAPPID>AMPP identifier for parent pack
+Up to a maximum of 18 digits<CHLDAPPID>AMPP identifier for sub pack
+Up to a maximum of 18 digits</CCONTENT>End Tag</COMB_CONTENT>End Tag</ACTUAL_MEDICINAL_PROD_PACKS>End Tag
+
+Ingredient
+
+TAG NameOptionalDescription<INGREDIENT_SUBSTANCES>Root Node<ING>Ingredients - this collection of tags will occur for each ingredient<ISID>Ingredient Substance Identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<ISIDDT>YDate ingredient substance identifier became valid
+Always 10 characters<ISIDPREV>YPrevious ingredient substance identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<INVALID>YInvalidity flag - If set to 1 indicates this is an invalid entry in file.
+1 digit only<NM>Ingredient Substance Name
+Up to a maximum of 255 characters</ING>End Tag</INGREDIENT_SUBSTANCES>End Tag
+
+Lookup
+
+TAG NameOptionalDescription<LOOKUP>Root Node<COMBINATION_PACK_IND>Code descriptions for AMPP/VMPP combination indicator<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</COMBINATION_PACK_IND>End Tag<COMBINATION_PROD_IND>Code descriptions for AMP/VMP combination indicator<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</COMBINATION_PROD_IND>End Tag<BASIS_OF_NAME>Code descriptions for VMP name basis.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 150 characters</INFO>End Tag</BASIS_OF_NAME>End Tag<NAMECHANGE_REASON>Code descriptions for VMP name change reason.   <INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 150 characters</INFO>End Tag</NAMECHANGE_REASON>End Tag<VIRTUAL_PRODUCT_PRES_STATUS>Code descriptions for VMP prescribing status.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</VIRTUAL_PRODUCT_PRES_STATUS>End Tag<CONTROL_DRUG_CATEGORY>Code descriptions for controlled drug category.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</CONTROL_DRUG_CATEGORY>  End Tag<LICENSING_AUTHORITY>Code descriptions for licensing authority.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</LICENSING_AUTHORITY>End Tag<UNIT_OF_MEASURE>Code descriptions for units of measure.<INFO>This collection of tags will occur for each code description pair.<CD>Code (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<CDDT>YDate code is applicable from
+Always 10 characters<CDPREV>YPrevious code
+Up to a maximum of 18 digits<DESC>Description
+Up to a maximum of 150 characters</INFO>End Tag</UNIT_OF_MEASURE>End Tag<FORM>Code descriptions for formulations (Form).<INFO>This collection of tags will occur for each code description pair.<CD>Code (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<CDDT>YDate code is applicable from
+Always 10 characters<CDPREV>YPrevious code
+Up to a maximum of 18 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</FORM>End Tag<ONT_FORM_ROUTE>Code descriptions for ontology form route (VMP Form & Route) combinations.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</ONT_FORM_ROUTE>End Tag<ROUTE>Code descriptions for routes of administration.<INFO>This collection of tags will occur for each code description pair.<CD>Code (SNOMED CT International or UK extension ID). Up to a maximum of 18 digits<CDDT>YDate code is applicable from
+Always 10 characters<CDPREV>YPrevious code
+Up to a maximum of 18 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</ROUTE>End Tag<DT_PAYMENT_CATEGORY>Code descriptions for Drug Tariff categories.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 characters<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</DT_PAYMENT_CATEGORY>End Tag<SUPPLIER>Code descriptions for suppliers.<INFO>This collection of tags will occur for each code description pair.<CD>Code (SNOMED CT UK extension ID)
+Up to a maximum of 18 digits<CDDT>YDate code is applicable from
+Always 10 characters<CDPREV>YPrevious code
+Up to a maximum of 18 digits<INVALID>YInvalidity flag - If set to 1 entry is invalid.
+1 digit only<DESC>Description
+Up to a maximum of 80 characters</INFO>End Tag</SUPPLIER>End Tag <FLAVOUR>Code descriptions for flavours.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</FLAVOUR>End Tag<COLOUR>Code descriptions for colours.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</COLOUR>End Tag<BASIS_OF_STRNTH>Code descriptions for basis of strength.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 150 characters</INFO>End Tag</BASIS_OF_STRNTH>End Tag<REIMBURSEMENT_STATUS>Code descriptions for reimbursement status.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</REIMBURSEMENT_STATUS>End Tag<SPEC_CONT>Code descriptions for special container indicator.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</SPEC_CONT>End Tag<DND>Code descriptions for Discount Not Deducted indicator.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag<DND>End Tag<VIRTUAL_PRODUCT_NON_AVAIL>VMP non availability of VMP status codes.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</VIRTUAL_PRODUCT_NON_AVAIL>End Tag<DISCONTINUED_IND>Code descriptions for discontinued indicator.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</DISCONTINUED_IND>End Tag<DF_INDICATOR>Code descriptions for Dose form indicator.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+1 digit only<DESC>Description
+Up to a maximum of 20 characters</INFO>End Tag</DF_INDICATOR>End Tag<PRICE_BASIS>Code descriptions for basis of AMPP price.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</PRICE_BASIS>End Tag<LEGAL_CATEGORY>Code descriptions for AMPP legal category.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag</LEGAL_CATEGORY>End Tag<AVAILABILITY_RESTRICTION>Code descriptions for AMP availability restriction.<INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag<AVAILABILITY_RESTRICTION>End Tag<LICENSING_AUTHORITY_CHANGE_REASON><INFO>This collection of tags will occur for each code description pair.<CD>Code
+Always 4 digits<DESC>Description
+Up to a maximum of 60 characters</INFO>End Tag<LICENSING_AUTHORITY_CHANGE_REASON>End Tag</LOOKUP>End Tag
+GTIN
+
+TAG NameOptionalDescription<GTIN_DETAILS>Root Node<AMPPS>All Actual Medicinal Product Packs that have Global Trade Identification Numbers (GTINs).<AMPP>This collection of tags will repeat for each AMPP that contains a GTIN<AMPPID>AMPP identifier (SNOMED CT UK extension ID) Reference to AMPP on main AMPP file
+Up to a maximum of 18 digits<GTIN>GTIN
+Either 13 or 14 digits with the rightmost digit a Check Digit<STARTDT>GTIN date - Date the GTIN became Valid
+Always 10 characters<ENDDT>YThe date the GTIN became invalid
+Always 10 characters</GTINDATA>End Tag</AMPP>End Tag</AMPPS>End Tag</GTIN_DETAILS>End Tag
+
+
+Appendix B - Detailed description of Supplementary XML files
+
+Conventions used in tag naming.
+DT = date in format CCYY-MM-DD
+CD = from lookup
+NM = name
+ID = key field pointing to another tag on same or different file
+
+BNF/ATC
+BNF and ATC codes are no longer released for AMP codes.
+
+TAG NameOptionalDescription<BNF_DETAILS>Root Node<VMPS>All Virtual Medicinal Products that have British National Formulary (BNF) or Anatomical Therapeutic Classification (ATC) details.<VMP>Virtual Medicinal Product - this collection of tags will occur for each Virtual Medicinal Product<VPID>VMP identifier (SNOMED CT UK extension code5). Reference to VMP on main VMP file
+Up to a maximum of 18 digits<BNF>YBNF Code
+Up to a maximum of 8 digits<ATC>YATC Code
+Up to a maximum of 7 characters<DDD>YDefined Daily dose relating to ATC code
+Up to a maximum of 6 digits<DDD_UOMCD>YDefined daily dose Unit of measure, narrative can be located in lookup file under tag <UNIT_OF_MEASURE>
+Up to a maximum of 18 digits</VMP>End Tag</VMPS>End Tag<AMPS>All Actual Medicinal Products that have BNF details.<AMP>Actual Medicinal Product - this collection of tags will occur for each Actual Medicinal Product<APID>AMP identifier (SNOMED CT UK extension ID). Reference to AMP on main AMP file.
+Up to a maximum of 18 digits<BNF>BNF Code
+Up to a maximum of 8 digits</AMP>End Tag</AMPS>End Tag</BNF_DETAILS>End Tag
+
+Historic Codes
+
+On occasions dm+d identifiers change, to cope with the change in identifier dm+d has a previous identifier field. If an identifier changes more than once the oldest code is "lost" from the latest release data. The HISTORY data contains all the previous IDs for current dm+d concept identifiers and a start and end data for when they were the active identifier. If no end date exists, then the identifier is the current code and the ID current and ID previous fields will be the same. Only the dm+d Drug classes that have previous identifiers are contained in the HISTORY data, these are VTM; VMP; Ingredient; Form; Route; Supplier and Units of Measure.
+
+TAG NameOptionalDescription<HISTORY>Root Node<VTMS>Collection of VTM's<VTM>Individual Virtual Therapeutic Moiety (VTM) (this collection of tags will occur for each VTM)<IDCURRENT>Virtual Therapeutic Moiety identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 integers<IDPREVIOUS>Previous VTM identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<STARTDT>VTM Identifier date - Date the VTM identifier became Valid
+Always 10 characters<ENDDT>YDate the VTM SNOMED CT identifier ended
+Always 10 characters</VTM>End Tag</VTMS>End Tag<VMPS>Collection of VMP's<VMP>Individual Virtual Medicinal Product (VMP) (this collection of tags will occur for each VMP)<IDCURRENT>Virtual Medicinal Product identifier 6(SNOMED CT UK extension ID)
+Up to a maximum of 18 digits<IDPREVIOUS>Previous product identifier6 ((SNOMED CT International or UK extension ID))
+Up to a maximum of 18 digits<STARTDT>Date VMP identifier became Valid
+Always 10 characters<ENDDT>YDate the VMP SNOMED code ended
+Always 10 characters</VMP>End Tag</VMPS>End Tag<INGS>Collection Ingredients<ING>Individual ingredient (this collection of tags will occur for each ingredient)<IDCURRENT>Ingredient substance identifier (SNOMED CT International or UK extension ID) can be located in ingredient file.
+Up to a maximum of 18 digits<IDPREVIOUS>Previous ingredient identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<STARTDT>Date ingredient identifier became Valid
+Always 10 characters<ENDDT>YDate the ingredient SNOMED CT identifier ended
+Always 10 characters</ING>End Tag</INGS>End Tag<SUPPS>Collection of Suppliers<SUPP>Individual supplier (this collection of tags will occur for each supplier)<IDCURRENT>Supplier identifier (SNOMED CT UK extension ID) Up to a maximum of 18 digits<IDPREVIOUS>Previous supplier identifier (SNOMED CT UK extension ID)
+Up to a maximum of 18 digits<STARTDT>Date supplier identifier became Valid
+Always 10 characters<ENDDT>YDate the supplier SNOMED CT identifier ended
+Always 10 characters</SUPP>End Tag</SUPPS>End Tag<FORMS>Formulation or Form associated with each VMP<FORM>Individual formulation (this collection of tags will occur for each formulation)<IDCURRENT>Formulation identifier (SNOMED CT International or UK extension ID) Up to a maximum of 18 digits<IDPREVIOUS>Previous formulation identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<STARTDT>Date formulation identifier became Valid
+Always 10 characters<ENDDT>YDate the formulation SNOMED code ended
+Always 10 characters</FORM>End Tag</FORMS>End Tag<ROUTES>Routes associated with each VMP<ROUTE>Individual route (this collection of tags will occur for each route)<IDCURRENT>Route identifier (SNOMED CT International or UK extension ID) Up to a maximum of 18 digits<IDPREVIOUS>Previous route identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<STARTDT>Date route identifier became Valid
+Always 10 characters<ENDDT>YDate the route SNOMED CT identifier ended
+Always 10 characters</ROUTE>End Tag</ROUTES>End Tag<UOMS>Collection of unit of measures (UOM)<UOM>Individual UOM (this collection of tags will occur for each uom)<IDCURRENT>UOM identifier (SNOMED CT International or UK extension ID) Up to a maximum of 18 digits<IDPREVIOUS>Previous UOM identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 digits<STARTDT>Date UOM identifier became Valid
+Always 10 characters<ENDDT>YDate the UOM SNOMED CT identifier ended
+Always 10 characters</UOM>End Tag</UOMS>End Tag</HISTORY>End Tag
+
+
+VTM Ingredient
+
+Holds the link between the VTM identifier (VTMID) to the Ingredient Identifier (ISID). On occasions a VTM might not have a link to an ingredient in which case the link will not exist in this data.
+
+
+TAG NameOptionalDescription<VTM_INGREDIENTS>Root Node<VTM_ING>Individual Virtual Therapeutic Moiety (VTM) to Ingredient (ING)
+(This collection of tags will occur for each VTM/Ingredient relationship)<VTMID>Virtual Therapeutic Moiety identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 integers<ISID>Ingredient identifier (SNOMED CT International or UK extension ID)
+Up to a maximum of 18 integers</VTM_ING>End Tag</VTM_INGREDIENTS>End Tag
+
+Annex I
+
+Historical Issue Sheet
+
+Document referenceCDR018HDocument locationf:\csd\projects\cdr\sec\reports\cdr018H.docTitleTechnical Specification of Data Files for the Dictionary of Medicines and Devices (dm+d)AuthorAlan Marshall/Kevan MahoneyIssued toAuthorised dm+d UsersWhy issuedFor reference
+Document control prior to 2013
+
+VersionDateAmended byApproved byDetails of amendmentsInitial Release24/05/2002-G CoyneN/AA09/09/2002A MarshallK MahoneyChange in Tag NamesB16/12/2002A MarshallK MahoneyChanges in extract frequencyC05/02/2003A MarshallK MahoneyChanges in tag order to match modelD10/02/2003A MarshallK MahoneyAddition of INVALID and VMP non availability indicator E05/03/2004R Thompson A Marshall Release 2 of DM+DF06/12/2004A MarshallReflect changes to schedule 10 and 11 indicatorG19/01/06A MarshallChanges to VTM for release 2.3 and supplementary BNF/ATC filesH15/12/06
+K Frenz
+M JohnsonChanges to match Editorial Policy and Data Model.
+Correction of TAG name in document only for strength value denominator/unit from 'DENOM' to 'DNMTR'I27/11/07M JohnsonEAN supplementary fileJ18/04/2008M JohnsonField sizes addedK13/10/2008M JohnsonReflect changes to distribution process. Updates to VMP prescribing statusL28/07/2009M JohnsonAll references to EAN have been changed to GTINM17/082010M. JohnsonReflect textual changes to a VMP Prescribing status value.N07/08/2013G. Bawn
+G. JepsonExtract Format amended to include GTIN zip file
+Supplementary files amended to reflect removal of GTIN content
+GTINs to be 13 or 14 character in length
+Reference to CSM amended to EMA
+Reference to ZERO_DISCD amended to DND
+Former Appendix C GTIN TAG Name and associated details revised and incorporated into Appendix A
+1 The diagram does not include the additional or supplementary file information
+2 https://isd.digital.nhs.uk/
+3 From 2023 all valid VMP concepts were assigned a SNOMED CT UK extension ID and no longer use international concept identifiers. Invalid concepts were not in scope for this change. There will be examples of VMPs where the VPIDPREV is an international concept ID.
+4  Actual product excipient data was ended in October 2022. The data fields under <AP_INGREDIENT> remain but contain no data.
+5 From 2023 all valid VMP concepts were assigned a SNOMED CT UK extension ID and no longer use international concept identifiers. Invalid concepts were not in scope for this change.
+
+6 From 2023 all valid VMP concepts were assigned a SNOMED CT UK extension ID and no longer use international concept identifiers. Invalid concepts were not in scope for this change. There will be examples of VMPs where the previous ID is an international concept ID.
+
+---------------
+
+------------------------------------------------------------
+
+---------------
+
+------------------------------------------------------------
+
+1
+
+
+2
+
+
+2
+
+
