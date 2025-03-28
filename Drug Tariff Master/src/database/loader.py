@@ -483,7 +483,7 @@ def build_unified_search_table(conn):
     # Insert data from AMPPs (branded packs)
     cursor.execute("""
         INSERT INTO unified_search (
-            vtmid, vpid, vppid, apid, appid, name, is_brand, ingredient_list, form, pack_size, dt_price, nhs_price, gtin
+            vtmid, vpid, vppid, apid, appid, name, is_brand, ingredient_list, form, pack_size, dt_price, nhs_price, gtin, strength
         )
         SELECT 
             v.vtmid, 
@@ -498,7 +498,8 @@ def build_unified_search_table(conn):
             vp.qty_value || ' ' || vp.qty_uom_code AS pack_size,
             dti.price AS dt_price,
             pi.price AS nhs_price,
-            g.gtin
+            g.gtin,
+            GROUP_CONCAT(DISTINCT ai.strength || ' ' || ai.uom_code, '; ') AS strength
         FROM ampp ap
         JOIN amp a ON ap.apid = a.apid
         JOIN vmp v ON a.vpid = v.vpid
@@ -512,6 +513,12 @@ def build_unified_search_table(conn):
         WHERE (ap.invalid IS NULL OR ap.invalid = 0)
           AND (g.end_date IS NULL OR g.end_date >= date('now'))
         GROUP BY ap.appid, g.gtin
+    """)
+    
+    # Update last_updated column for all records
+    cursor.execute("""
+        UPDATE unified_search
+        SET last_updated = CURRENT_TIMESTAMP
     """)
     
     conn.commit()

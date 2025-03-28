@@ -257,9 +257,15 @@ The application uses a SQLite database with the following schema structure:
 ### Search Table
 
 - **unified_search**: Denormalized table for efficient searching
-  - Fields: id (PK), vtmid, vpid, vppid, apid, appid, gtin, name, is_brand, ingredient_list, form, etc.
+  - Fields: id (PK), vtmid, vpid, vppid, apid, appid, gtin, name, is_brand, ingredient_list, form, strength, pack_size, dt_price, nhs_price, calculation_method, last_updated
   - Combines data from multiple tables for fast querying
   - Contains calculated fields like is_brand, ingredient_list, and pack_size
+  - Optimized with indexes for web application performance
+
+- **web_product_view**: A view for common web application queries
+  - Provides formatted price fields (in GBP)
+  - Simplifies access to the most commonly needed fields
+  - Improves application performance by pre-formatting data
 
 ### Database Relationships
 
@@ -438,9 +444,15 @@ The Price Calculator now:
 
 ### 2. Expanded Search Capabilities
 
-- Search products by ingredient, form, or brand
-- Filter by price range or availability
-- Find potential substitutes for specific products
+Status: **Partially Implemented**
+- Web application-optimized search with:
+  - Efficient indexes for faster queries
+  - Pre-formatted data in web_product_view
+  - Improved database structure for search performance
+- Additional search capabilities to be implemented:
+  - Search products by ingredient, form, or brand
+  - Filter by price range or availability
+  - Find potential substitutes for specific products
 
 ### 3. API Access
 

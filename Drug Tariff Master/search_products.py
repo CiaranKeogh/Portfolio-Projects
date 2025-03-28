@@ -29,7 +29,7 @@ def search_by_name(conn, name, limit=10):
     # First get the total count
     count_query = """
     SELECT COUNT(*) as total
-    FROM unified_search
+    FROM web_product_view
     WHERE name LIKE ?
     """
     cursor = conn.cursor()
@@ -43,11 +43,11 @@ def search_by_name(conn, name, limit=10):
         CASE WHEN is_brand = 1 THEN 'Brand' ELSE 'Generic' END as type,
         ingredient_list,
         pack_size,
-        dt_price / 100.0 as dt_price,
-        nhs_price / 100.0 as nhs_price,
+        dt_price_gbp as dt_price,
+        nhs_price_gbp as nhs_price,
         gtin
     FROM
-        unified_search
+        web_product_view
     WHERE
         name LIKE ?
     ORDER BY
@@ -62,7 +62,7 @@ def search_by_ingredient(conn, ingredient, limit=10):
     # First get the total count
     count_query = """
     SELECT COUNT(*) as total
-    FROM unified_search
+    FROM web_product_view
     WHERE ingredient_list LIKE ?
     """
     cursor = conn.cursor()
@@ -76,11 +76,11 @@ def search_by_ingredient(conn, ingredient, limit=10):
         CASE WHEN is_brand = 1 THEN 'Brand' ELSE 'Generic' END as type,
         ingredient_list,
         pack_size,
-        dt_price / 100.0 as dt_price,
-        nhs_price / 100.0 as nhs_price,
+        dt_price_gbp as dt_price,
+        nhs_price_gbp as nhs_price,
         gtin
     FROM
-        unified_search
+        web_product_view
     WHERE
         ingredient_list LIKE ?
     ORDER BY
@@ -98,11 +98,11 @@ def search_by_gtin(conn, gtin):
         CASE WHEN is_brand = 1 THEN 'Brand' ELSE 'Generic' END as type,
         ingredient_list,
         pack_size,
-        dt_price / 100.0 as dt_price,
-        nhs_price / 100.0 as nhs_price,
+        dt_price_gbp as dt_price,
+        nhs_price_gbp as nhs_price,
         gtin
     FROM
-        unified_search
+        web_product_view
     WHERE
         gtin = ?
     LIMIT 1
@@ -117,7 +117,7 @@ def search_by_date(conn, date, limit=10):
     # First get the total count
     count_query = """
     SELECT COUNT(*) as total
-    FROM unified_search
+    FROM web_product_view
     WHERE date(last_updated) >= date(?)
     """
     cursor = conn.cursor()
@@ -131,15 +131,15 @@ def search_by_date(conn, date, limit=10):
         CASE WHEN is_brand = 1 THEN 'Brand' ELSE 'Generic' END as type,
         ingredient_list,
         pack_size,
-        dt_price / 100.0 as dt_price,
-        nhs_price / 100.0 as nhs_price,
+        dt_price_gbp as dt_price,
+        nhs_price_gbp as nhs_price,
         gtin
     FROM
-        unified_search
+        web_product_view
     WHERE
         date(last_updated) >= date(?)
     ORDER BY
-        date(last_updated) DESC
+        last_updated DESC
     LIMIT ?
     """
     cursor.execute(query, (date, limit))

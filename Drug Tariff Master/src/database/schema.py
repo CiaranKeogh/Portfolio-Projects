@@ -294,6 +294,7 @@ def create_database(db_path):
                 dt_price INTEGER,
                 nhs_price INTEGER,
                 calculation_method TEXT,
+                last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 
                 FOREIGN KEY (vtmid) REFERENCES vtm(vtmid),
                 FOREIGN KEY (vpid) REFERENCES vmp(vpid),
@@ -312,6 +313,28 @@ def create_database(db_path):
             CREATE INDEX IF NOT EXISTS idx_gtin_gtin ON gtin(gtin);
             CREATE INDEX IF NOT EXISTS idx_unified_search_name ON unified_search(name);
             CREATE INDEX IF NOT EXISTS idx_unified_search_gtin ON unified_search(gtin);
+            
+            -- Additional indexes for web application performance
+            CREATE INDEX IF NOT EXISTS idx_unified_search_ingredient_form ON unified_search(ingredient_list, form);
+            CREATE INDEX IF NOT EXISTS idx_unified_search_price_range ON unified_search(dt_price, nhs_price);
+            CREATE INDEX IF NOT EXISTS idx_unified_search_calculation ON unified_search(calculation_method);
+
+            -- Create view for common web queries
+            CREATE VIEW IF NOT EXISTS web_product_view AS
+            SELECT 
+                id, 
+                name, 
+                is_brand, 
+                ingredient_list, 
+                form, 
+                strength, 
+                pack_size, 
+                dt_price/100.0 AS dt_price_gbp,
+                nhs_price/100.0 AS nhs_price_gbp,
+                calculation_method,
+                gtin
+            FROM 
+                unified_search;
         """)
         
         conn.commit()

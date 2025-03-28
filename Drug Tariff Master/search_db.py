@@ -41,10 +41,10 @@ def main():
         
         if args.gtin:
             if unified_search_exists:
-                # Search by GTIN in unified_search table
+                # Search by GTIN in web_product_view
                 cursor.execute("""
                     SELECT *
-                    FROM unified_search
+                    FROM web_product_view
                     WHERE gtin = ?
                 """, (args.gtin,))
                 
@@ -132,10 +132,10 @@ def main():
         
         elif args.query:
             if unified_search_exists:
-                # Search in the unified_search table
+                # Search in the web_product_view
                 cursor.execute("""
                     SELECT COUNT(*) as count 
-                    FROM unified_search 
+                    FROM web_product_view 
                     WHERE name LIKE ?
                 """, (f"%{args.query}%",))
                 count = cursor.fetchone()['count']
@@ -145,7 +145,7 @@ def main():
                 if count > 0:
                     cursor.execute("""
                         SELECT * 
-                        FROM unified_search 
+                        FROM web_product_view 
                         WHERE name LIKE ? 
                         LIMIT ?
                     """, (f"%{args.query}%", args.limit))
