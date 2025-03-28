@@ -1,187 +1,236 @@
-# Drug Tariff Master
+# Drug Tariff Processor
 
-A comprehensive application for searching, viewing, and analyzing NHS Drug Tariff data. This project provides tools for managing and exploring UK medicinal product information, including pricing data.
+## Project Overview
 
-## Features
+This application processes NHS Dictionary of Medicines and Devices (dm+d) data to match various medical product entities and calculate missing drug tariff prices. The system automates the download, parsing, and processing of NHS TRUD data files to create a structured database with comprehensive price information.
 
-- **Data Management**
-  - Import and parse NHS Dictionary of Medicines and Devices (dm+d) data from TRUD
-  - Automatic database initialization and schema management
-  - Support for all standard dm+d entities: VMP, VMPP, AMP, AMPP, and GTIN
+### Key Objectives
 
-- **Advanced Search**
-  - Fast text-based search across all product types
-  - Filter by product type (VMP, VMPP, AMP, AMPP)
-  - Detailed product information with relationships
-  - Command-line and web-based interfaces
+1. Download and process NHS dm+d XML files weekly
+2. Match Actual Medicinal Product Packs (AMPP) to Virtual Medicinal Product Packs (VMPP)
+3. Link Global Trade Item Numbers (GTIN) to AMPP
+4. Calculate missing drug tariff prices using defined rules
+5. Create a unified search table for efficient querying
 
-- **Pricing Analysis**
-  - Display pricing information for Actual Medicinal Product Packs (AMPPs)
-  - Pricing sources clearly indicated (Drug Tariff, SAME VMPP, etc.)
-  - Support for historical pricing data
+## Current Implementation Status
 
-- **Web Interface**
-  - Modern, responsive design using Bootstrap 5
-  - Interactive search with real-time filtering
-  - Detailed product information views
-  - Database statistics dashboard
-  - CSV export and print functionality
+- [x] Download functionality to retrieve dm+d files from NHS TRUD
+- [x] Extract nested ZIP files and find required XML files
+- [x] Robust error handling and retry logic
+- [x] Logging of download process
+- [ ] Data parsing and database creation
+- [ ] Price calculation for missing tariff prices
+- [ ] Search functionality
 
-## Getting Started
-
-### Prerequisites
+## Requirements
 
 - Python 3.8 or higher
-- SQLite3
-- Internet connection (for initial data download)
+- NHS TRUD API key (register at [TRUD](https://isd.digital.nhs.uk/))
 
-### Installation
+## Installation
 
-1. Clone the repository:
+1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/drug-tariff-master.git
-   cd drug-tariff-master
+   git clone <repository-url>
+   cd "Drug Tariff Master"
    ```
 
-2. Install dependencies:
+2. Create a virtual environment and activate it:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+   ```
+
+3. Install the required dependencies:
    ```
    pip install -r requirements.txt
    ```
 
-3. Initialize the application:
+4. Copy `.env.example` to `.env` and add your TRUD API key:
    ```
-   python src/app.py --init
-   ```
-
-4. Update data from TRUD:
-   ```
-   python src/app.py --update
+   cp .env.example .env
+   # Edit .env and add your TRUD_API_KEY
    ```
 
-### Running the Application
+## Usage
 
-#### Command-line Interface
+### Downloading dm+d Files
 
-```
-# Interactive search interface
-python src/app.py --search
+To download the latest dm+d files from NHS TRUD:
 
-# Build or rebuild search index
-python src/app.py --build-search
+```bash
+python main.py --download-only
 ```
 
-#### Web Interface
+You can also provide the API key directly:
 
-```
-# Start the web interface
-python src/app.py --web
-
-# Specify host and port
-python src/app.py --web --host=0.0.0.0 --port=8080
-
-# Run in debug mode
-python src/app.py --web --debug
+```bash
+python main.py --download-only --api-key YOUR_API_KEY
 ```
 
-Alternatively, use the convenience script:
+Additional options:
 
 ```
-python run_web_app.py
+--output-dir DATA_DIR   Directory to save downloaded files (default: data)
+--retries COUNT         Number of retries for failed downloads (default: 3)
+--retry-delay SECONDS   Delay between retries in seconds (default: 300)
 ```
 
-## Latest Updates
+## Detailed Code Architecture
 
-### Search Improvements
-
-- **Enhanced Search Algorithm**: Improved search quality by focusing on the NAME field for more accurate results
-- **Fallback Mechanism**: If no results are found in the search_data table, the system now searches directly in the main tables (AMPP and VMP)
-- **Better Parameter Handling**: Improved search parameter handling and error reporting
-
-### New Web Interface
-
-- **Modern UI**: Clean, responsive design using Bootstrap 5
-- **Interactive Search**: Real-time filtering and pagination of search results
-- **Detailed Product Views**: Complete product information with related entities
-- **Statistics Dashboard**: Overview of database contents and record counts
-- **Export Options**: Download search results as CSV or print them directly
-
-### API Endpoints
-
-The web interface provides RESTful API endpoints:
-
-- `/api/search`: Search for medicinal products
-  - Parameters: `q` (search term), `type` (product type), `limit`, `page`
-- `/api/product/<record_type>/<product_id>`: Get detailed information about a specific product
-- `/api/stats`: Get database statistics
-
-## Project Structure
+### Project Structure
 
 ```
-drug-tariff-master/
-│
-├── src/                   # Source code
-│   ├── app.py             # Application entry point
-│   ├── config.py          # Configuration settings
-│   ├── database.py        # Database management
-│   ├── downloader.py      # Data download utilities
-│   ├── parser.py          # XML parsing utilities
-│   ├── pricing.py         # Price calculation algorithms
-│   ├── scheduler.py       # Scheduled task management
-│   ├── search.py          # Search functionality
-│   ├── trud.py            # TRUD API interaction
-│   └── web_app.py         # Web interface
-│
-├── web/                   # Web interface assets
-│   ├── static/            # Static files
-│   │   ├── css/           # CSS stylesheets
-│   │   └── js/            # JavaScript files
-│   ├── templates/         # HTML templates
-│   └── README.md          # Web interface documentation
-│
-├── data/                  # Data directory (created on initialization)
-│   ├── dmd_data.db        # SQLite database
-│   └── logs/              # Log files
-│
-├── check_db.py            # Database check utility
-├── check_port.py          # Network port testing utility
-├── run_debug.py           # Debug script for troubleshooting
-├── run_web_app.py         # Convenience script for web interface
-├── test_search.py         # Search testing utility
-├── requirements.txt       # Python dependencies
-└── README.md              # This file
+Drug Tariff Master/
+├── config/                 # Configuration and settings
+│   └── logging_config.py   # Logging setup with timestamped files
+├── data/                   # Storage for downloaded and processed data
+├── logs/                   # Application logs with timestamps
+├── src/                    # Source code modules
+│   ├── __init__.py         # Source package initialization
+│   └── download/           # Download functionality
+│       ├── __init__.py     # Exports download module functions
+│       └── downloader.py   # Core download and extraction logic
+├── .env                    # Environment variables (API keys)
+├── .env.example            # Template for environment variables
+├── .gitignore              # Specifies files to exclude from version control
+├── main.py                 # Application entry point with CLI
+└── requirements.txt        # Python dependencies
 ```
 
-## Data Structure
+### Component Details
 
-The application works with the following data entities:
+#### 1. Download Module (`src/download/`)
 
-- **VMP** (Virtual Medicinal Products): Conceptual products without a supplier
-- **VMPP** (Virtual Medicinal Product Packs): Conceptual packs of a VMP
-- **AMP** (Actual Medicinal Products): Actual products from specific suppliers
-- **AMPP** (Actual Medicinal Product Packs): Actual packs of an AMP with pricing
-- **GTIN** (Global Trade Item Numbers): Standardized identifiers for medicinal products
+**Purpose**: Handle downloading and extracting dm+d files from NHS TRUD.
 
-## VMPP Pricing Calculation
+**Key Files**:
+- `downloader.py`: Contains functions for:
+  - `request_json()`: Fetches JSON data from API endpoints with retry logic
+  - `download_file()`: Downloads files with progress tracking and retry logic
+  - `extract_zip()`: Extracts files from ZIP archives with specific file selection
+  - `download_dmd_files()`: Orchestrates the entire download process
 
-When an AMPP doesn't have a direct price specified, the system can derive its price based on other AMPPs that belong to the same VMPP through the "SAME VMPP" pricing calculation:
+**Flow**:
+1. Requests latest release information from NHS TRUD API
+2. Downloads the main ZIP file
+3. Extracts XML files from the main archive
+4. Finds and processes the nested ZIP containing GTIN data
+5. Returns paths to all required extracted files
 
-1. For AMPPs missing direct price information
-2. The system identifies the VMPP it belongs to
-3. It finds other AMPPs that belong to the same VMPP and have known prices
-4. It calculates a reference price from these similar products
-5. This reference price is assigned with "SAME VMPP" as the price source
+#### 2. Configuration Module (`config/`)
 
-This ensures pricing consistency across different brands of the same medicinal product.
+**Purpose**: Centralize application configuration.
 
-## Contributing
+**Key Files**:
+- `logging_config.py`: Sets up logging with:
+  - Timestamped log files
+  - Both file and console output
+  - Configurable log levels
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+#### 3. Main Application (`main.py`)
+
+**Purpose**: Provide CLI interface and orchestrate application flow.
+
+**Key Features**:
+- Command-line argument parsing
+- Environment variable loading
+- Error handling and logging
+- Execution flow control
+
+**Execution Flow**:
+1. Loads environment variables
+2. Parses command-line arguments
+3. Sets up logging
+4. Gets API key from arguments or environment
+5. Executes download functionality
+6. Handles errors and returns appropriate exit codes
+
+## Data Processing (Planned)
+
+The following functionality is planned for future implementation:
+
+### 1. Data Parsing
+
+Will parse XML files into a SQLite database with tables for:
+- VMP (Virtual Medicinal Product)
+- VMPP (Virtual Medicinal Product Pack)
+- AMP (Actual Medicinal Product)
+- AMPP (Actual Medicinal Product Pack)
+- GTIN (Global Trade Item Number)
+
+### 2. Price Calculation
+
+Will implement logic to calculate missing prices based on:
+- Same VMPP calculation method
+- Same VMP calculation method
+- Default pricing for remaining records
+
+### 3. Search Table
+
+Will create a unified search table joining all product information with:
+- Product relationships established
+- Brand/Generic classification
+- Price information with calculation method
+
+## API Reference
+
+### Environment Variables
+
+- `TRUD_API_KEY`: Required for accessing NHS TRUD data
+- `GEMINI_API_KEY`: For future LLM tasks (not currently used)
+
+### Command-line Arguments
+
+- `--download-only`: Only download files, don't process them
+- `--api-key`: TRUD API key (overrides environment variable)
+- `--output-dir`: Directory for downloaded files (default: "data")
+- `--retries`: Number of download retry attempts (default: 3)
+- `--retry-delay`: Delay between retries in seconds (default: 300)
+
+## Error Handling
+
+The application includes robust error handling with:
+
+- Custom `DownloadError` exception for download-related failures
+- Automatic retry logic (3 retries with 5-minute delays by default)
+- Detailed logging of errors and retry attempts
+- Graceful handling of missing files
+
+## Logging
+
+Logs are stored in the `logs/` directory with timestamps for each session. The logging system captures:
+
+- Information messages about process flow
+- Warning messages for non-critical issues
+- Error messages for failures
+- Detailed information about download progress
+
+## Next Steps
+
+Future development will include:
+
+1. Parsing XML files into a SQLite database
+   - Implementation of XSD validation
+   - Creation of tables with proper relationships
+   - Extraction of relevant fields
+
+2. Implementing price calculation logic based on the PRD rules
+   - Initial price assignment from PRICE_INFO and DTINFO
+   - Same VMPP calculation method
+   - Same VMP calculation method
+   - Default pricing for remaining records
+
+3. Creating a unified search table
+   - Joining data across product tables
+   - Implementing Brand/Generic classification
+   - Creating indexes for efficient searches
+
+4. Developing expanded CLI/API
+   - Commands for searching products
+   - Options for exporting data
+   - Filtering capabilities
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- NHS Business Services Authority (NHSBSA) for providing the TRUD data service
-- UK NHS Dictionary of Medicines and Devices (dm+d) for the data structure 
+[MIT License](LICENSE) 
