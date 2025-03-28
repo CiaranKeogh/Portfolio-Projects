@@ -88,6 +88,41 @@ Additional options:
 --api-key KEY           TRUD API key (overrides env variable)
 ```
 
+### Searching the Database
+
+To search for products in the database, use the provided search scripts:
+
+```bash
+# Search for products by name
+python search_db.py --query "paracetamol"
+
+# Search for a specific GTIN (barcode)
+python search_db.py --gtin 5000309007767
+
+# Limit the number of results
+python search_db.py --query "aspirin" --limit 5
+```
+
+The search utility supports:
+- Text search across product names
+- Exact GTIN lookup
+- Control over the number of results returned
+
+For more structured search with tabular output:
+```bash
+# Search by product name
+python search_products.py --name paracetamol
+
+# Search by ingredient
+python search_products.py --ingredient codeine
+
+# Search by GTIN
+python search_products.py --gtin 5000309007767
+
+# Search for products updated after a specific date
+python search_products.py --date 2023-01-01
+```
+
 ### Handling of File Versioning
 
 The NHS TRUD service provides files with date or version suffixes in the filenames (e.g., `f_amp2_3200325.xml`). The download module automatically handles these varying filenames by:
