@@ -1,0 +1,36 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.pytest_cache/
+
+# Data files
+data/raw/*
+*.xml
+*.xsd
+*.zip
+*.db
+*.pdf
+*.xlsx
+*.xls
+*.docx
+*.doc
+
+# Logs
+logs/*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS specific
+.DS_Store
+Thumbs.db 
