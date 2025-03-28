@@ -22,7 +22,7 @@ This application processes NHS Dictionary of Medicines and Devices (dm+d) data t
 - [x] Handling of date-suffixed filenames (e.g., f_amp2_3200325.xml)
 - [x] Data parsing and database creation
 - [x] Unified search table for efficient querying
-- [ ] Price calculation for missing tariff prices
+- [x] Price calculation for missing tariff prices
 - [ ] API for accessing the data
 
 ## Requirements
@@ -60,7 +60,7 @@ This application processes NHS Dictionary of Medicines and Devices (dm+d) data t
 
 ### Downloading and Processing dm+d Files
 
-To download the latest dm+d files and load them into the database:
+To download the latest dm+d files, load them into the database, and automatically calculate missing prices:
 
 ```bash
 python main.py
@@ -78,7 +78,58 @@ To rebuild the database from scratch:
 python main.py --rebuild-db
 ```
 
+To download and process files but skip the automatic price calculation:
+
+```bash
+python main.py --skip-price-calculation
+```
+
+### Calculating Missing Prices
+
+To only calculate missing prices without downloading new data:
+
+```bash
+python main.py --calculate-prices
+```
+
+This will:
+1. Identify AMPPs with missing prices
+2. Classify them by status (needs calculation, intentionally missing)
+3. Apply calculation methods for those that need prices
+4. Update the unified search table
+
+For products identified as intentionally missing prices (non-reimbursable, hospital-only, discontinued, etc.), the system will record the reason for the missing price.
+
 Additional options:
+
+```bash
+# Force recalculation of all prices
+python main.py --recalculate-prices
+```
+
+### Price Calculator Demonstration
+
+For a more detailed analysis of price calculation results, use the demonstration script:
+
+```bash
+# Calculate missing prices and display analysis
+python calculate_prices.py
+
+# Only analyze existing price data without recalculating
+python calculate_prices.py --analyze-only
+
+# Show detailed statistics about calculated prices
+python calculate_prices.py --detailed-report
+```
+
+This script provides:
+- Summary statistics of priced and unpriced AMPPs
+- Breakdown of missing prices by reason
+- Counts of prices calculated by each method
+- Examples of products with calculated prices
+- Detailed reports on confidence scores and price distributions
+
+### Additional Options
 
 ```
 --output-dir DATA_DIR   Directory to save downloaded files (default: data)
@@ -188,7 +239,11 @@ The application uses a SQLite database with the following schema structure:
   - Fields: vppid (PK, FK), pay_cat_code (PK), price, dt, prev_price
 
 - **ampp_price_info**: Pricing info for AMPP
-  - Fields: appid (PK, FK), price, price_date, price_prev, price_basis_code
+  - Fields: appid (PK, FK), price, price_date, price_prev, price_basis_code, calculation_method, price_status, missing_reason, confidence_score, calculation_date
+  - calculation_method: Indicates how the price was calculated ("same_product_different_size", "same_vmpp_different_brand", "similar_vmp")
+  - price_status: Status of the price ("calculated", "intentionally_missing", "unknown")
+  - missing_reason: For intentionally missing prices, records why ("non_reimbursable", "discontinued", "hospital_only", "not_available")
+  - confidence_score: A measure of confidence in the calculated price (0-1)
 
 - **ampp_reimb_info**: Reimbursement info for AMPP
   - Fields: appid (PK, FK), various reimbursement flags
@@ -233,6 +288,13 @@ Ingredients and routes can be associated with both VMPs and AMPs, while pricing 
    - AMPP (as they reference both AMPs and VMPPs)
    - GTIN (as they reference AMPPs)
 5. **Search Table Building**: After all data is loaded, the unified search table is built for efficient querying
+6. **Price Calculation**: Missing prices are automatically calculated based on comparable products:
+   - Products are first classified to identify which need price calculation
+   - Prices are calculated using three methods in order of preference:
+     1. Same product with different pack size
+     2. Different brands of the same VMPP
+     3. Similar VMPs with the same ingredient, form, and similar strength
+   - Calculated prices are stored with metadata about the calculation method and confidence
 
 ## Detailed Code Architecture
 
@@ -251,9 +313,12 @@ Drug Tariff Master/
 │   │   ├── __init__.py     # Exports database module functions
 │   │   ├── loader.py       # XML parsing and database loading
 │   │   └── schema.py       # Database schema definition
-│   └── download/           # Download functionality
-│       ├── __init__.py     # Exports download module functions
-│       └── downloader.py   # Core download and extraction logic
+│   ├── download/           # Download functionality
+│   │   ├── __init__.py     # Exports download module functions
+│   │   └── downloader.py   # Core download and extraction logic
+│   └── calculator/         # Price calculation functionality
+│       ├── __init__.py     # Exports calculator module functions
+│       └── calculator.py   # Price calculation logic
 ├── .env                    # Environment variables (API keys)
 ├── .env.example            # Template for environment variables
 ├── .gitignore              # Specifies files to exclude from version control
@@ -304,7 +369,27 @@ Drug Tariff Master/
 4. Builds a unified search table for efficient querying
 5. Handles data validation and error cases
 
-#### 3. Configuration Module (`config/`)
+#### 3. Calculator Module (`src/calculator/`)
+
+**Purpose**: Calculate missing prices for AMPPs based on comparable products.
+
+**Key Functions**:
+- `calculate_missing_prices()`: Main function to orchestrate price calculation
+- `_classify_missing_prices()`: Identifies and categorizes AMPPs with missing prices
+- `_check_missing_price_reason()`: Determines why a price might be missing
+- `_calculate_price_for_ampp()`: Applies different calculation methods for an AMPP
+- `_try_same_product_different_size()`: Calculates price based on same product with different pack size
+- `_try_same_vmpp_different_brand()`: Calculates price based on different brands of same VMPP
+- `_try_similar_vmp()`: Calculates price based on similar VMPs with same ingredient and form
+
+**Flow**:
+1. Updates database schema to add required fields for price calculation
+2. Identifies and classifies AMPPs with missing prices
+3. For each AMPP that needs calculation, tries different methods in order
+4. Updates the database with calculated prices and metadata
+5. Updates the unified search table with the new prices
+
+#### 4. Configuration Module (`config/`)
 
 **Purpose**: Centralize application configuration.
 
@@ -314,7 +399,7 @@ Drug Tariff Master/
   - Both file and console output
   - Configurable log levels
 
-#### 4. Main Application (`main.py`)
+#### 5. Main Application (`main.py`)
 
 **Purpose**: Provide CLI interface and orchestrate application flow.
 
@@ -323,15 +408,17 @@ Drug Tariff Master/
 - Environment variable loading
 - Error handling and logging
 - Execution flow control
+- Price calculation options
 
 **Execution Flow**:
 1. Loads environment variables
 2. Parses command-line arguments
 3. Sets up logging
 4. Gets API key from arguments or environment
-5. Executes download functionality
+5. Executes download functionality (if not in price calculation mode)
 6. Creates/updates database and loads data (if not download-only)
-7. Handles errors and returns appropriate exit codes
+7. Calculates missing prices (if requested)
+8. Handles errors and returns appropriate exit codes
 
 ## Planned Features
 
@@ -339,10 +426,15 @@ The following functionality is planned for future implementation:
 
 ### 1. Price Calculator
 
-Will implement logic to calculate missing prices based on:
-- Same VMPP calculation method
-- Same VMP calculation method
-- Default pricing for remaining records
+Status: **Implemented**
+The Price Calculator now:
+- Identifies products with missing prices
+- Determines if prices are intentionally missing (non-reimbursable, hospital-only, etc.)
+- Calculates prices for products that should have them using three methods:
+  1. Same product with different pack sizes
+  2. Different brands of the same VMPP
+  3. Similar VMPs with the same ingredients, form, and similar strength
+- Records metadata about calculation methods and confidence scores
 
 ### 2. Expanded Search Capabilities
 

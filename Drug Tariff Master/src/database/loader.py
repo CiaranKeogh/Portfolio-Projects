@@ -17,6 +17,10 @@ def load_data(db_path, file_paths):
     """
     Load data from dm+d XML files into the database.
     
+    This function processes the XML files in the correct order to maintain referential integrity
+    and builds a unified search table for efficient querying. After this process completes,
+    the price calculation can be performed separately to fill in missing prices.
+    
     Args:
         db_path (str): Path to the SQLite database
         file_paths (dict): Dict mapping standardized file names to actual file paths
