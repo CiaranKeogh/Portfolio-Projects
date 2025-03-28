@@ -2,7 +2,7 @@
 """
 Drug Tariff Processor - Main Script
 
-This script handles the downloading of dm+d files from the NHS TRUD service.
+This script handles the downloading and processing of dm+d files from the NHS TRUD service.
 For the complete functionality, refer to the README.md file.
 """
 
@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config.logging_config import setup_logging
 from src.download import download_dmd_files, DownloadError
+from src.database import create_database, load_data
 
 def parse_args():
     """Parse command line arguments."""
@@ -29,6 +30,10 @@ def parse_args():
                         help='Number of retries for failed downloads')
     parser.add_argument('--retry-delay', type=int, default=300,
                         help='Delay between retries in seconds')
+    parser.add_argument('--db-path', type=str, default='data/dmd.db',
+                        help='Path to SQLite database file')
+    parser.add_argument('--rebuild-db', action='store_true',
+                        help='Rebuild the database from scratch')
     
     return parser.parse_args()
 
@@ -67,8 +72,22 @@ def main():
             logger.info("Download-only mode, exiting")
             return
         
-        # Additional processing would go here in future versions
-        logger.info("Processing functionality not yet implemented")
+        # Create or check the database
+        logger.info(f"Setting up database at {args.db_path}")
+        if args.rebuild_db or not os.path.exists(args.db_path):
+            success = create_database(args.db_path)
+            if not success:
+                logger.error("Failed to create database")
+                sys.exit(1)
+        
+        # Process the files and load into database
+        logger.info("Processing files and loading to database")
+        success = load_data(args.db_path, files)
+        if not success:
+            logger.error("Failed to load data into database")
+            sys.exit(1)
+        
+        logger.info("Data processing completed successfully")
         
     except DownloadError as e:
         logger.error(f"Download failed: {e}")
