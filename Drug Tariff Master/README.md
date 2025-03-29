@@ -6,27 +6,36 @@ An automated system that processes NHS Dictionary of Medicines and Devices (dm+d
 
 ```
 Drug Tariff Master/
-├── src/                    # Source code
-│   ├── drug_tariff_master/ # Package directory
-│       ├── __init__.py     # Package initialization
-│       ├── main.py         # Main entry point for the application
-│       ├── download_dmd.py # Download mechanism for dm+d files
-│       ├── config.py       # Configuration settings
-│       ├── utils.py        # Utility functions (logging, etc.)
-│       ├── logs/           # Log files (automatically managed)
-├── tests/                  # Test scripts
-│   ├── unit/               # Unit tests
-│       ├── test_download.py# Tests for download mechanism
-├── data/                   # Data files
-│   ├── raw/                # Raw XML files downloaded from TRUD
-├── schemas/                # XSD schema files
-├── .env                    # Environment variables (API keys, etc.)
-├── .env.example            # Example environment variables file
-├── requirements.txt        # Python dependencies
-├── requirements-dev.txt    # Development dependencies
-├── pyproject.toml          # Project metadata and build configuration
-├── setup.cfg               # Package configuration
-└── README.md               # This file
+├── src/                      # Source code
+│   └── drug_tariff_master/   # Package directory
+│       ├── __init__.py       # Package initialization
+│       ├── main.py           # CLI entry point with command handling
+│       ├── config.py         # Configuration settings including database path
+│       ├── download.py       # Download mechanism for dm+d files
+│       ├── setup_database.py # Database schema creation
+│       ├── load_data.py      # XML parsing and database loading
+│       └── utils.py          # Utility functions (logging, XML processing)
+├── tests/                    # Test scripts
+│   ├── unit/                 # Unit tests
+│   │   ├── test_download.py  # Tests for download mechanism
+│   │   └── __init__.py       # Unit test package initialization
+│   ├── __init__.py           # Test package initialization
+│   └── run_tests.py          # Test runner
+├── data/                     # Data directory
+│   ├── raw/                  # Raw XML files downloaded from TRUD
+│   └── dmd.db                # SQLite database (created by setup-db)
+├── logs/                     # Log files directory
+│   └── *.log                 # Various log files
+├── schemas/                  # XSD schema files for XML validation
+│   └── *.xsd                 # Schema files for each XML type
+├── .env                      # Environment variables (API keys)
+├── .env.example              # Example environment variables file
+├── .gitignore                # Git ignore rules
+├── requirements.txt          # Python dependencies
+├── requirements-dev.txt      # Development dependencies
+├── pyproject.toml            # Project metadata and build configuration
+├── setup.cfg                 # Package configuration
+└── README.md                 # This documentation file
 ```
 
 ## Features
