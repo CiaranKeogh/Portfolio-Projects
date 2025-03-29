@@ -9,6 +9,8 @@ import argparse
 from pathlib import Path
 
 from drug_tariff_master import download_dmd
+from drug_tariff_master import setup_database
+from drug_tariff_master import load_data
 from drug_tariff_master.utils import setup_logger
 
 # Set up logger
@@ -27,9 +29,13 @@ def parse_args():
     # Download command
     download_parser = subparsers.add_parser("download", help="Download dm+d files")
     
+    # Setup database command
+    setup_db_parser = subparsers.add_parser("setup-db", help="Set up the database")
+    
+    # Load data command
+    load_parser = subparsers.add_parser("load", help="Load data into the database")
+    
     # Future commands will be added here
-    # setup_db_parser = subparsers.add_parser("setup-db", help="Set up the database")
-    # load_parser = subparsers.add_parser("load", help="Load data into the database")
     # search_parser = subparsers.add_parser("search", help="Search the database")
     # search_parser.add_argument("term", help="Search term")
     
@@ -43,18 +49,18 @@ def main():
     if args.command == "download":
         logger.info("Running download command")
         return download_dmd.main()
-    # elif args.command == "setup-db":
-    #     logger.info("Running setup-db command")
-    #     return setup_database.main()
-    # elif args.command == "load":
-    #     logger.info("Running load command")
-    #     return load_data.main()
+    elif args.command == "setup-db":
+        logger.info("Running setup-db command")
+        return setup_database.main()
+    elif args.command == "load":
+        logger.info("Running load command")
+        return load_data.main()
     # elif args.command == "search":
     #     logger.info("Running search command")
     #     return search_dmd.main([args.term])
     else:
         logger.error(f"Unknown command: {args.command}")
-        print("Available commands: download")
+        print("Available commands: download, setup-db, load")
         return 1
 
 
