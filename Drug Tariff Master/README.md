@@ -44,10 +44,12 @@ Drug Tariff Master/
 - Defines and enforces Primary Key (PK) and Foreign Key (FK) relationships
 - Implements appropriate constraints
 
-### Phase 3: Data Parsing & Loading (Upcoming)
+### Phase 3: Data Parsing & Loading (In Progress)
 - Parses XML files in the correct loading order (respecting FK constraints)
-- Efficiently loads data into database tables
-- Performs error handling and logging
+- Efficiently loads data into database tables with batch processing
+- Implements robust error handling and transaction management
+- Validates XML files against schema definitions (XSD) before loading
+- Provides detailed logging and table row counts for validation
 
 ### Phase 4: Search Data Preparation (Upcoming)
 - Creates a denormalized search_data table for efficient searching
@@ -108,11 +110,18 @@ dmd [command]
 Available commands:
 - `download`: Download dm+d files from TRUD API
 - `setup-db`: Set up the SQLite database schema
-- `load`: Load downloaded data into the database
+- `load`: Load downloaded data into the database with XML validation and transaction management
 
-Example:
+Examples:
 ```
+# Download dm+d files
 dmd download
+
+# Set up the database schema
+dmd setup-db
+
+# Load data from downloaded files
+dmd load
 ```
 
 ### Using the Package in Python
@@ -120,10 +129,17 @@ dmd download
 You can also use the package in your Python code:
 
 ```python
-from drug_tariff_master import download
+from drug_tariff_master import download, setup_database, load_data
 
 # Download dm+d files
-result = download.main()
+download_result = download.main()
+
+# Set up the database schema
+setup_result = setup_database.main()
+
+# Load data into the database
+loader = load_data.DataLoader()
+load_result = loader.load_data()
 ```
 
 ### Running as a Module
@@ -182,7 +198,12 @@ The project follows a strict implementation plan to ensure data integrity and ef
 1. **Download Handling**: Gets required files (f_vtm2_*.xml, f_vmp2_*.xml, f_vmpp2_*.xml, f_amp2_*.xml, f_ampp2_*.xml, f_gtin2_*.xml, f_lookup2_*.xml)
 2. **Database Creation**: Sets up an SQLite database with tables corresponding to XML structures in the `data/` directory
 3. **Relationship Implementation**: Defines and enforces PK and FK relationships between tables
-4. **Data Parsing & Loading**: Reads XML files and inserts data into database tables
+4. **Data Parsing & Loading**: Reads XML files and inserts data into database tables with these features:
+   - XML validation against schemas
+   - Safe text extraction with error handling
+   - Batch processing with fallback to individual inserts
+   - Complete transaction management (all-or-nothing loading)
+   - Table counts reporting and validation
 5. **Lookup Integration**: Populates descriptive fields by joining main data tables with lookup tables
 6. **Search Data Preparation**: Creates a denormalized table for efficient searching
 7. **Basic Search**: Implements a simple CLI search tool
