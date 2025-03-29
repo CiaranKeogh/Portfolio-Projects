@@ -83,6 +83,10 @@ class DataLoader:
                 # Enable foreign keys
                 conn.execute("PRAGMA foreign_keys = ON")
                 
+                # Clear existing data if requested
+                if clear_existing:
+                    self._clear_existing_data(conn)
+                
                 # Load in order
                 lookup_file = file_mapping[r"f_lookup2_\d+\.xml"]
                 self._load_lookup_data(conn, lookup_file)
@@ -210,6 +214,96 @@ class DataLoader:
             # Handle other SQLite errors during batch attempt
             logger.error(f"Batch insert failed with SQLite error: {e}")
             return 0
+
+    def _clear_existing_data(self, conn):
+        """
+        Clear all data from existing tables in the correct order.
+        
+        This method removes all data from the tables while preserving the table structure.
+        Tables are cleared in the reverse order of dependencies to avoid foreign key constraint violations.
+        
+        Args:
+            conn: The active sqlite3.Connection object.
+        """
+        logger.info("Clearing existing data from database tables...")
+        
+        cursor = conn.cursor()
+        
+        # Tables in reverse dependency order (same as in setup_database.py)
+        tables_in_reverse_dependency_order = [
+            # AMPP detail/linking tables
+            "ampp_gtin",
+            "ampp_combination_content",
+            "ampp_reimbursement_info",
+            "ampp_price_info",
+            "ampp_prescribing_info",
+            "ampp_appliance_pack_info",
+            "ampp",
+            
+            # VMPP detail/linking tables
+            "vmpp_combination_content",
+            "vmpp_drug_tariff_info",
+            "vmpp",
+            
+            # AMP detail/linking tables
+            "amp_information",
+            "amp_licensed_route",
+            "amp_ingredient",
+            "amp",
+            
+            # VMP detail/linking tables
+            "vmp_control_drug_info",
+            "vmp_drug_route",
+            "vmp_drug_form",
+            "vmp_ontology_form_route",
+            "vmp_ingredient",
+            "vmp",
+            
+            # VTM tables
+            "vtm",
+            
+            # Ingredient tables
+            "ingredient",
+            
+            # Lookup tables
+            "lookup_licensing_authority_change_reason",
+            "lookup_availability_restriction",
+            "lookup_legal_category",
+            "lookup_price_basis",
+            "lookup_df_indicator",
+            "lookup_discontinued_indicator",
+            "lookup_virtual_product_non_avail",
+            "lookup_dnd",
+            "lookup_special_container",
+            "lookup_reimbursement_status",
+            "lookup_basis_of_strength",
+            "lookup_colour",
+            "lookup_flavour",
+            "lookup_supplier",
+            "lookup_drug_tariff_payment_category",
+            "lookup_route",
+            "lookup_ontology_form_route",
+            "lookup_form",
+            "lookup_unit_of_measure",
+            "lookup_licensing_authority",
+            "lookup_control_drug_category",
+            "lookup_virtual_product_pres_status",
+            "lookup_name_change_reason",
+            "lookup_basis_of_name",
+            "lookup_combination_product_indicator",
+            "lookup_combination_pack_indicator"
+        ]
+        
+        for table_name in tables_in_reverse_dependency_order:
+            try:
+                cursor.execute(f"DELETE FROM {table_name};")
+                logger.debug(f"Cleared data from table {table_name}")
+            except sqlite3.Error as e:
+                logger.error(f"Error clearing data from table {table_name}: {e}")
+        
+        # Commit is not done here as this method should be part of a larger transaction
+        
+        logger.info("Finished clearing existing data.")
 
 
 def main():
