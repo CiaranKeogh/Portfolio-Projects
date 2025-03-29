@@ -18,14 +18,11 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
 import time
 
-# Add the parent directory to the path to allow imports from the project
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from config import (
+from drug_tariff_master.config import (
     TRUD_API_KEY, TRUD_API_BASE_URL, DMD_ITEM_ID,
     RAW_DATA_DIR, REQUIRED_FILE_PATTERNS, matches_required_pattern
 )
-from utils import setup_logger
+from drug_tariff_master.utils import setup_logger
 
 # Set up logger
 logger = setup_logger("download", "download.log")
@@ -249,45 +246,41 @@ def main() -> int:
         # Get the latest release URL
         release_url = get_latest_release_url()
         if not release_url:
-            logger.error("Failed to get release URL")
+            logger.error("Failed to get latest release URL")
             return 1
         
-        # Clean the raw data directory
-        if RAW_DATA_DIR.exists():
-            # Only clean XML and ZIP files, not subdirectories
-            for file_path in RAW_DATA_DIR.glob("*.xml"):
-                file_path.unlink()
-            for file_path in RAW_DATA_DIR.glob("*.zip"):
-                file_path.unlink()
-        else:
-            os.makedirs(RAW_DATA_DIR, exist_ok=True)
+        # Create a temporary directory for the download
+        download_dir = RAW_DATA_DIR
+        os.makedirs(download_dir, exist_ok=True)
         
         # Download the ZIP file
-        zip_path = RAW_DATA_DIR / "dmd_release.zip"
+        zip_path = download_dir / "dmd_latest.zip"
         if not download_file(release_url, zip_path):
-            logger.error("Failed to download release file")
+            logger.error("Failed to download the file")
             return 1
         
-        # Extract the main ZIP file
-        if not extract_zip(zip_path, RAW_DATA_DIR):
-            logger.error("Failed to extract ZIP file")
+        # Extract the ZIP file
+        if not extract_zip(zip_path, download_dir):
+            logger.error("Failed to extract the ZIP file")
             return 1
         
-        # Find and extract the GTIN ZIP file
-        find_and_extract_gtin_zip(RAW_DATA_DIR)
+        # Handle nested GTIN ZIP file
+        find_and_extract_gtin_zip(download_dir)
         
-        # Verify required files
-        success, missing_patterns = verify_required_files(RAW_DATA_DIR)
+        # Verify required files are present
+        success, missing_patterns = verify_required_files(download_dir)
         if not success:
+            logger.error("Not all required files were found")
             return 1
+        
+        # Clean up
+        if zip_path.exists():
+            logger.info(f"Removing ZIP file: {zip_path}")
+            zip_path.unlink()
         
         logger.info("dm+d download process completed successfully")
         return 0
-    
+        
     except Exception as e:
-        logger.exception(f"Unexpected error: {e}")
-        return 1
-
-
-if __name__ == "__main__":
-    sys.exit(main()) 
+        logger.error(f"An unexpected error occurred: {e}")
+        return 1 

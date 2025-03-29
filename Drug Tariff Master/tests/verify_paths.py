@@ -20,16 +20,15 @@ print(f"Parent directory: {parent_dir}")
 project_root = file_path.parent.parent
 print(f"Project root: {project_root}")
 
-# Print src directory
-src_dir = project_root / "src"
-print(f"Src directory: {src_dir}")
-print(f"Src directory exists: {src_dir.exists()}")
+# Print package directory
+package_dir = project_root / "src" / "drug_tariff_master"
+print(f"Package directory: {package_dir}")
+print(f"Package directory exists: {package_dir.exists()}")
 
-# Add src to path and try to import config
-sys.path.insert(0, str(src_dir))
-print("\nTrying to import config module...")
+# Try to import the package
+print("\nTrying to import drug_tariff_master package...")
 try:
-    import config
+    import drug_tariff_master.config as config
     print("Config module imported successfully!")
     print(f"TRUD API BASE URL: {config.TRUD_API_BASE_URL}")
 except ImportError as e:

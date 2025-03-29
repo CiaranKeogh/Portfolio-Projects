@@ -7,7 +7,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
-from config import LOGS_DIR
+from drug_tariff_master.config import LOGS_DIR
 
 
 def setup_logger(name: str, log_file: Optional[str] = None) -> logging.Logger:

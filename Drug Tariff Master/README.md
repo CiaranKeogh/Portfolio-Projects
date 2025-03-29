@@ -7,18 +7,15 @@ An automated system that processes NHS Dictionary of Medicines and Devices (dm+d
 ```
 Drug Tariff Master/
 ├── src/                    # Source code
-│   ├── main.py             # Main entry point for the application
-│   ├── download_dmd.py     # Download mechanism for dm+d files
-│   ├── config.py           # Configuration settings
-│   ├── utils.py            # Utility functions (logging, etc.)
-│   ├── setup_database.py   # Database schema definition (upcoming)
-│   ├── load_data.py        # Data parsing and loading (upcoming)
-│   ├── search_dmd.py       # Basic search implementation (upcoming)
+│   ├── drug_tariff_master/ # Package directory
+│       ├── __init__.py     # Package initialization
+│       ├── main.py         # Main entry point for the application
+│       ├── download_dmd.py # Download mechanism for dm+d files
+│       ├── config.py       # Configuration settings
+│       ├── utils.py        # Utility functions (logging, etc.)
 ├── tests/                  # Test scripts
-│   ├── test_download.py    # Tests for download mechanism
-│   ├── test_api_key.py     # Script to test API key configuration
-│   ├── run_test.py         # Script to test application setup and display file info
-│   ├── run_tests.py        # Script to run all tests
+│   ├── unit/               # Unit tests
+│       ├── test_download.py# Tests for download mechanism
 ├── data/                   # Data files
 │   ├── raw/                # Raw XML files downloaded from TRUD
 ├── logs/                   # Log files
@@ -26,6 +23,8 @@ Drug Tariff Master/
 ├── .env                    # Environment variables (API keys, etc.)
 ├── .env.example            # Example environment variables file
 ├── requirements.txt        # Python dependencies
+├── pyproject.toml          # Project metadata and build configuration
+├── setup.cfg               # Package configuration
 └── README.md               # This file
 ```
 
@@ -66,39 +65,42 @@ Drug Tariff Master/
 
 ### Installation
 
+#### Development Installation
+
 1. Clone the repository:
    ```
    git clone <repository-url>
    cd drug-tariff-master
    ```
 
-2. Install required packages:
+2. Install the package in development mode:
    ```
-   pip install -r requirements.txt
+   pip install -e .
    ```
 
 3. Set up your TRUD API key:
    - Edit `.env` and replace `your_trud_api_key_here` with your actual TRUD API key
    - Or set it as an environment variable: `export TRUD_API_KEY=your_api_key` (Linux/macOS) or `set TRUD_API_KEY=your_api_key` (Windows)
 
-4. Test your API key configuration:
+#### Regular Installation
+
+1. Install the package from the repository:
    ```
-   python -m tests.test_api_key
+   pip install git+<repository-url>
    ```
 
-5. Run the general test script to verify setup:
-   ```
-   python -m tests.run_test
-   ```
+2. Set your TRUD API key as an environment variable:
+   - `export TRUD_API_KEY=your_api_key` (Linux/macOS)
+   - `set TRUD_API_KEY=your_api_key` (Windows)
 
 ## Usage
 
 ### Using the CLI Interface
 
-The application provides a unified command-line interface through `main.py`:
+After installation, you can use the `dmd` command directly:
 
 ```
-python -m src.main [command]
+dmd [command]
 ```
 
 Available commands:
@@ -106,39 +108,43 @@ Available commands:
 
 Example:
 ```
-python -m src.main download
+dmd download
 ```
 
-### Direct Usage
+### Using the Package in Python
 
-#### Downloading Data
-```
-python -m src.download_dmd
+You can also use the package in your Python code:
+
+```python
+from drug_tariff_master import download_dmd
+
+# Download dm+d files
+result = download_dmd.main()
 ```
 
-This will:
-1. Connect to the TRUD API to get the latest release URL
-2. Download the main ZIP file to `data/raw/dmd_release.zip`
-3. Extract all files to the `data/raw/` directory
-4. Find and extract the nested GTIN ZIP file
-5. Verify that all required files are present using pattern matching
+### Running as a Module
+
+If you prefer to run the code as a module without installing it:
+
+```
+python -m drug_tariff_master.main [command]
+```
+
+Example:
+```
+python -m drug_tariff_master.main download
+```
 
 ### Running Tests
 
 Run all tests:
 ```
-python -m tests.run_tests
+python -m unittest discover tests
 ```
 
 Run a specific test:
 ```
-python -m unittest tests.test_download
-```
-
-Check the API key and system setup:
-```
-python -m tests.test_api_key
-python -m tests.run_test
+python -m unittest tests.unit.test_download
 ```
 
 ## Downloaded Files

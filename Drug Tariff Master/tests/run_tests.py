@@ -5,9 +5,6 @@ import unittest
 import sys
 from pathlib import Path
 
-# Add the src directory to the path to allow imports from the project
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
 
 if __name__ == "__main__":
     # Discover and run all tests

@@ -4,17 +4,13 @@ Test script for the download_dmd.py module.
 This script tests the functionality of the download_dmd.py module
 without actually downloading large files from the TRUD API.
 """
-import sys
 import os
 from pathlib import Path
 import unittest
 from unittest.mock import patch, MagicMock
 
-# Add the src directory to the path to allow imports from the project
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-from config import RAW_DATA_DIR, REQUIRED_FILES
-import download_dmd
+from drug_tariff_master.config import RAW_DATA_DIR, REQUIRED_FILE_PATTERNS
+from drug_tariff_master import download_dmd
 
 
 class TestDownloadDmd(unittest.TestCase):
@@ -25,7 +21,7 @@ class TestDownloadDmd(unittest.TestCase):
         # Create test directory if it doesn't exist
         os.makedirs(RAW_DATA_DIR, exist_ok=True)
     
-    @patch('download_dmd.get_latest_release_url')
+    @patch('drug_tariff_master.download_dmd.get_latest_release_url')
     def test_get_latest_release_url(self, mock_get_latest_release_url):
         """Test get_latest_release_url function."""
         # Mock the function to return a test URL
@@ -62,24 +58,29 @@ class TestDownloadDmd(unittest.TestCase):
     
     def test_verify_required_files(self):
         """Test verify_required_files function."""
-        # Create temporary test files
+        # Create temporary test files to match the required file patterns
         test_files = []
-        for required_file in REQUIRED_FILES:
-            test_file = RAW_DATA_DIR / required_file
+        for pattern in REQUIRED_FILE_PATTERNS:
+            # Extract the pattern name without the regex part
+            file_prefix = pattern.split('_')[1].split('2')[0]
+            # Create a filename that matches the pattern
+            filename = f"f_{file_prefix}2_20240101.xml"
+            test_file = RAW_DATA_DIR / filename
             test_file.touch()
             test_files.append(test_file)
         
         # Call the function
-        missing_files = download_dmd.verify_required_files(RAW_DATA_DIR)
+        success, missing_patterns = download_dmd.verify_required_files(RAW_DATA_DIR)
         
         # Check the result
-        self.assertEqual(len(missing_files), 0)
+        self.assertTrue(success)
+        self.assertEqual(len(missing_patterns), 0)
         
         # Remove one file and test again
         test_files[0].unlink()
-        missing_files = download_dmd.verify_required_files(RAW_DATA_DIR)
-        self.assertEqual(len(missing_files), 1)
-        self.assertEqual(missing_files[0], REQUIRED_FILES[0])
+        success, missing_patterns = download_dmd.verify_required_files(RAW_DATA_DIR)
+        self.assertFalse(success)
+        self.assertEqual(len(missing_patterns), 1)
         
         # Clean up
         for test_file in test_files[1:]:

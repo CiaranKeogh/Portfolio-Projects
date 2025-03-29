@@ -1,0 +1,14 @@
+2025-03-29 11:21:02 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:21:02 - download - INFO - Download completed: C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\data\raw\test.zip
+2025-03-29 11:21:02 - download - INFO - Verifying required files
+2025-03-29 11:21:02 - download - INFO - All required file patterns matched
+2025-03-29 11:21:02 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_20240101.xml
+2025-03-29 11:21:02 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_20240101.xml
+2025-03-29 11:21:02 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_20240101.xml
+2025-03-29 11:21:02 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_20240101.xml
+2025-03-29 11:21:02 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_20240101.xml
+2025-03-29 11:21:02 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_20240101.xml
+2025-03-29 11:21:02 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_20240101.xml
+2025-03-29 11:21:02 - download - INFO - Verifying required files
+2025-03-29 11:21:02 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
+2025-03-29 11:21:02 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml

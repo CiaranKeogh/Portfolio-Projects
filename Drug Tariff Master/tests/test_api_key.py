@@ -2,13 +2,7 @@
 Test that the TRUD API key is set correctly.
 """
 import sys
-import os
-from pathlib import Path
-
-# Add the src directory to the path to allow imports from the project
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-
-from config import TRUD_API_KEY
+from drug_tariff_master.config import TRUD_API_KEY
 
 
 def main():
@@ -25,7 +19,7 @@ def main():
         masked_key = '****'
     
     print(f"SUCCESS: TRUD API key found: {masked_key}")
-    print("You can now run 'python src/main.py download' to download the dm+d files.")
+    print("You can now run 'dmd download' to download the dm+d files.")
     return 0
 
 

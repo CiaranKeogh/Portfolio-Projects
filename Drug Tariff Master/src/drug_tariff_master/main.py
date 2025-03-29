@@ -8,11 +8,8 @@ import sys
 import argparse
 from pathlib import Path
 
-# Add the current directory to the path to allow imports from the project
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-import download_dmd
-from utils import setup_logger
+from drug_tariff_master import download_dmd
+from drug_tariff_master.utils import setup_logger
 
 # Set up logger
 logger = setup_logger("main", "main.log")
@@ -59,6 +56,11 @@ def main():
         logger.error(f"Unknown command: {args.command}")
         print("Available commands: download")
         return 1
+
+
+def cli_entry_point():
+    """Entry point for CLI when installed as a package."""
+    sys.exit(main())
 
 
 if __name__ == "__main__":
