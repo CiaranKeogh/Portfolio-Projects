@@ -14,9 +14,11 @@ import zipfile
 import requests
 import shutil
 import re
+import time
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
-import time
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 from drug_tariff_master.config import (
     TRUD_API_KEY, TRUD_API_BASE_URL, DMD_ITEM_ID,
@@ -26,6 +28,36 @@ from drug_tariff_master.utils import setup_logger
 
 # Set up logger
 logger = setup_logger("download", "download.log")
+
+# Default retry configuration
+DEFAULT_RETRY_CONFIG = Retry(
+    total=5,
+    backoff_factor=0.5,
+    status_forcelist=[500, 502, 503, 504],
+    allowed_methods=["GET", "HEAD"],
+    respect_retry_after_header=True
+)
+
+
+def create_session_with_retries(retries=None):
+    """
+    Create a requests session with retry functionality.
+    
+    Args:
+        retries: A urllib3.util.retry.Retry configuration. If None, DEFAULT_RETRY_CONFIG is used.
+    
+    Returns:
+        A requests.Session with retry functionality.
+    """
+    if retries is None:
+        retries = DEFAULT_RETRY_CONFIG
+        
+    session = requests.Session()
+    adapter = HTTPAdapter(max_retries=retries)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    
+    return session
 
 
 def get_latest_release_url() -> Optional[str]:
@@ -46,7 +78,8 @@ def get_latest_release_url() -> Optional[str]:
     
     try:
         logger.info(f"Requesting latest release information from TRUD API")
-        response = requests.get(releases_url, timeout=60)
+        session = create_session_with_retries()
+        response = session.get(releases_url, timeout=60)
         response.raise_for_status()
         
         # Parse response JSON
@@ -66,11 +99,23 @@ def get_latest_release_url() -> Optional[str]:
             logger.error("No releases found in the API response")
             return None
     
-    except requests.RequestException as e:
-        logger.error(f"Error requesting releases from TRUD API: {e}")
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Connection error while requesting from TRUD API: {e}")
         return None
-    except (ValueError, KeyError) as e:
-        logger.error(f"Error parsing API response: {e}")
+    except requests.exceptions.Timeout as e:
+        logger.error(f"Timeout while requesting from TRUD API: {e}")
+        return None
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"HTTP error from TRUD API (status code {e.response.status_code}): {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error requesting from TRUD API: {e}")
+        return None
+    except ValueError as e:
+        logger.error(f"Error parsing JSON response: {e}")
+        return None
+    except KeyError as e:
+        logger.error(f"Missing key in API response: {e}")
         return None
 
 
@@ -88,8 +133,18 @@ def download_file(url: str, output_path: Path) -> bool:
     try:
         logger.info(f"Downloading file from {url}")
         
+        # Create a session with retries for resilience
+        session = create_session_with_retries(
+            Retry(
+                total=5,
+                backoff_factor=1,  # Wait 1, 2, 4, 8, 16 seconds between retries
+                status_forcelist=[500, 502, 503, 504, 429],  # Also retry on 429 Too Many Requests
+                allowed_methods=["GET"]
+            )
+        )
+        
         # Use requests with stream=True for large files
-        with requests.get(url, stream=True, timeout=300) as r:
+        with session.get(url, stream=True, timeout=300) as r:
             r.raise_for_status()
             
             # Get total file size if available
@@ -119,7 +174,16 @@ def download_file(url: str, output_path: Path) -> bool:
         logger.info(f"Download completed: {output_path}")
         return True
     
-    except requests.RequestException as e:
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Connection error while downloading file: {e}")
+        return False
+    except requests.exceptions.Timeout as e:
+        logger.error(f"Timeout while downloading file: {e}")
+        return False
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"HTTP error while downloading file (status code {e.response.status_code}): {e}")
+        return False
+    except requests.exceptions.RequestException as e:
         logger.error(f"Error downloading file: {e}")
         return False
     except IOError as e:
@@ -153,6 +217,9 @@ def extract_zip(zip_path: Path, extract_to: Path) -> bool:
         return False
     except IOError as e:
         logger.error(f"Error extracting ZIP: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Unexpected error extracting ZIP: {e}")
         return False
 
 
@@ -202,35 +269,39 @@ def verify_required_files(directory: Path) -> Tuple[bool, List[str]]:
     """
     logger.info("Verifying required files")
     
-    # Get all XML files in the directory
-    xml_files = [f.name for f in directory.glob("*.xml")]
-    
-    # Check each required pattern against the files
-    missing_patterns = []
-    matched_patterns = []
-    
-    for pattern in REQUIRED_FILE_PATTERNS:
-        # Check if any of the files match this pattern
-        matched = False
-        for filename in xml_files:
-            if re.match(pattern, filename):
-                matched = True
-                matched_patterns.append(f"{pattern} -> {filename}")
-                break
+    try:
+        # Get all XML files in the directory
+        xml_files = [f.name for f in directory.glob("*.xml")]
         
-        if not matched:
-            missing_patterns.append(pattern)
-            logger.warning(f"No file matching pattern '{pattern}' found")
-    
-    # Log the results
-    if missing_patterns:
-        logger.error(f"Missing required file patterns: {', '.join(missing_patterns)}")
-        return False, missing_patterns
-    else:
-        logger.info("All required file patterns matched")
-        for match in matched_patterns:
-            logger.info(f"Matched: {match}")
-        return True, []
+        # Check each required pattern against the files
+        missing_patterns = []
+        matched_patterns = []
+        
+        for pattern in REQUIRED_FILE_PATTERNS:
+            # Check if any of the files match this pattern
+            matched = False
+            for filename in xml_files:
+                if re.match(pattern, filename):
+                    matched = True
+                    matched_patterns.append(f"{pattern} -> {filename}")
+                    break
+            
+            if not matched:
+                missing_patterns.append(pattern)
+                logger.warning(f"No file matching pattern '{pattern}' found")
+        
+        # Log the results
+        if missing_patterns:
+            logger.error(f"Missing required file patterns: {', '.join(missing_patterns)}")
+            return False, missing_patterns
+        else:
+            logger.info("All required file patterns matched")
+            for match in matched_patterns:
+                logger.info(f"Matched: {match}")
+            return True, []
+    except Exception as e:
+        logger.error(f"Error verifying required files: {e}")
+        return False, ["Error occurred during verification"]
 
 
 def main() -> int:
