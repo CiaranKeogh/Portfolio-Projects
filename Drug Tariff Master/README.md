@@ -23,6 +23,7 @@ Drug Tariff Master/
 ├── .env                    # Environment variables (API keys, etc.)
 ├── .env.example            # Example environment variables file
 ├── requirements.txt        # Python dependencies
+├── requirements-dev.txt    # Development dependencies
 ├── pyproject.toml          # Project metadata and build configuration
 ├── setup.cfg               # Package configuration
 └── README.md               # This file
@@ -36,6 +37,7 @@ Drug Tariff Master/
 - Handles nested GTIN ZIP files
 - Verifies the presence of all required files using pattern matching
 - Logs progress and errors
+- Provides visual progress bars for downloads, extraction, and verification
 
 ### Phase 2: Database Schema Definition (Upcoming)
 - Creates SQLite database with tables corresponding to XML structures
@@ -60,7 +62,7 @@ Drug Tariff Master/
 
 ### Prerequisites
 - Python 3.8+
-- Required Python libraries: requests, lxml, python-dotenv
+- Required Python libraries: requests, lxml, python-dotenv, urllib3, tqdm
 - TRUD API key (obtained from https://isd.digital.nhs.uk/trud)
 
 ### Installation
@@ -146,6 +148,16 @@ Run a specific test:
 ```
 python -m unittest tests.unit.test_download
 ```
+
+## User Experience Improvements
+
+The download process includes several user experience enhancements:
+
+1. **Progress Bars**: Visual progress bars for file downloads, ZIP extraction, and file verification
+2. **Network Retries**: Automatic retry mechanism for network requests to handle transient issues
+3. **Detailed Error Messages**: Specific error messages for different network or file-related issues
+
+These features make the download process more user-friendly and robust against common failures.
 
 ## Downloaded Files
 

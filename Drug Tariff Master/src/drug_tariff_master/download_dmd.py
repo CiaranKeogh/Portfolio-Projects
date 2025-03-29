@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+from tqdm import tqdm
 
 from drug_tariff_master.config import (
     TRUD_API_KEY, TRUD_API_BASE_URL, DMD_ITEM_ID,
@@ -156,20 +157,23 @@ def download_file(url: str, output_path: Path) -> bool:
                     # No content length header, download directly
                     f.write(r.content)
                 else:
-                    # Track progress for larger files
-                    downloaded = 0
+                    # Use tqdm to display a nice progress bar
+                    desc = f"Downloading {output_path.name}"
                     chunk_size = 8192  # 8KB chunks
                     
-                    for chunk in r.iter_content(chunk_size=chunk_size):
-                        if chunk:
-                            f.write(chunk)
-                            downloaded += len(chunk)
-                            
-                            # Print progress
-                            progress = downloaded / total_size * 100
-                            print(f"\rDownload progress: {progress:.1f}%", end='')
-                    
-                    print()  # New line after progress
+                    with tqdm(
+                        total=total_size,
+                        unit='B',
+                        unit_scale=True,
+                        unit_divisor=1024,
+                        desc=desc,
+                        miniters=1,
+                        leave=True
+                    ) as pbar:
+                        for chunk in r.iter_content(chunk_size=chunk_size):
+                            if chunk:
+                                f.write(chunk)
+                                pbar.update(len(chunk))
         
         logger.info(f"Download completed: {output_path}")
         return True
@@ -206,8 +210,15 @@ def extract_zip(zip_path: Path, extract_to: Path) -> bool:
         logger.info(f"Extracting {zip_path} to {extract_to}")
         
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            # Extract all files
-            zip_ref.extractall(extract_to)
+            # Get list of files in the ZIP
+            file_list = zip_ref.namelist()
+            total_files = len(file_list)
+            
+            # Use tqdm to show extraction progress
+            with tqdm(total=total_files, desc="Extracting files", unit="files") as pbar:
+                for file in file_list:
+                    zip_ref.extract(file, extract_to)
+                    pbar.update(1)
         
         logger.info(f"Extraction completed")
         return True
@@ -277,18 +288,22 @@ def verify_required_files(directory: Path) -> Tuple[bool, List[str]]:
         missing_patterns = []
         matched_patterns = []
         
-        for pattern in REQUIRED_FILE_PATTERNS:
-            # Check if any of the files match this pattern
-            matched = False
-            for filename in xml_files:
-                if re.match(pattern, filename):
-                    matched = True
-                    matched_patterns.append(f"{pattern} -> {filename}")
-                    break
-            
-            if not matched:
-                missing_patterns.append(pattern)
-                logger.warning(f"No file matching pattern '{pattern}' found")
+        # Use tqdm to show verification progress
+        with tqdm(total=len(REQUIRED_FILE_PATTERNS), desc="Verifying files", unit="patterns") as pbar:
+            for pattern in REQUIRED_FILE_PATTERNS:
+                # Check if any of the files match this pattern
+                matched = False
+                for filename in xml_files:
+                    if re.match(pattern, filename):
+                        matched = True
+                        matched_patterns.append(f"{pattern} -> {filename}")
+                        break
+                
+                if not matched:
+                    missing_patterns.append(pattern)
+                    logger.warning(f"No file matching pattern '{pattern}' found")
+                
+                pbar.update(1)
         
         # Log the results
         if missing_patterns:
