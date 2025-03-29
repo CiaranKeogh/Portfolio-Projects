@@ -82,3 +82,65 @@
 2025-03-29 11:49:46 - download - INFO - Verifying required files
 2025-03-29 11:49:46 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
 2025-03-29 11:49:46 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
+2025-03-29 13:49:07 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 13:49:07 - download - INFO - Download completed: C:\Users\Ciaran\AppData\Local\Temp\tmp2zrr_m2k\test.zip
+2025-03-29 13:49:07 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 13:49:07 - download - ERROR - Connection error while downloading file: Connection error
+2025-03-29 13:49:07 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 13:49:07 - download - ERROR - Timeout while downloading file: Timeout error
+2025-03-29 13:49:07 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 13:49:07 - download - ERROR - HTTP error while downloading file (status code 404): Not Found
+2025-03-29 13:49:07 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmptdlsxnwg\test.zip to C:\Users\Ciaran\AppData\Local\Temp\tmptdlsxnwg\extracted
+2025-03-29 13:49:07 - download - INFO - Extraction completed
+2025-03-29 13:49:07 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpi3t6loi8\invalid.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpi3t6loi8\extracted
+2025-03-29 13:49:07 - download - ERROR - Invalid ZIP file: File is not a zip file
+2025-03-29 13:49:07 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpi3t6loi8\nonexistent.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpi3t6loi8\extracted
+2025-03-29 13:49:07 - download - ERROR - Error extracting ZIP: [Errno 2] No such file or directory: 'C:\\Users\\Ciaran\\AppData\\Local\\Temp\\tmpi3t6loi8\\nonexistent.zip'
+2025-03-29 13:49:07 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 13:49:07 - download - INFO - Found GTIN ZIP file: C:\Users\Ciaran\AppData\Local\Temp\tmpmjgc0oun\f_gtin2_20240101.zip
+2025-03-29 13:49:07 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 13:49:07 - download - WARNING - No GTIN ZIP file found
+2025-03-29 13:49:07 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 13:49:07 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 13:49:07 - download - ERROR - No releases found in the API response
+2025-03-29 13:49:07 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 13:49:07 - download - ERROR - No archive file URL found in the latest release
+2025-03-29 13:49:07 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 13:49:07 - download - ERROR - Connection error while requesting from TRUD API: Connection error
+2025-03-29 13:49:07 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 13:49:07 - download - ERROR - Timeout while requesting from TRUD API: Timeout error
+2025-03-29 13:49:07 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 13:49:07 - download - ERROR - HTTP error from TRUD API (status code 404): Not Found
+2025-03-29 13:49:07 - download - INFO - Verifying required files
+2025-03-29 13:49:07 - download - INFO - All required file patterns matched
+2025-03-29 13:49:07 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_20240101.xml
+2025-03-29 13:49:07 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_20240101.xml
+2025-03-29 13:49:07 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_20240101.xml
+2025-03-29 13:49:07 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_20240101.xml
+2025-03-29 13:49:07 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_20240101.xml
+2025-03-29 13:49:07 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_20240101.xml
+2025-03-29 13:49:07 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_20240101.xml
+2025-03-29 13:49:07 - download - INFO - Verifying required files
+2025-03-29 13:49:07 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
+2025-03-29 13:49:07 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
+2025-03-29 13:50:27 - download - INFO - Starting dm+d download process
+2025-03-29 13:50:27 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 13:50:27 - download - INFO - Downloading file from https://isd.digital.nhs.uk/download/api/v1/keys/86ead0de139d8018be1e1457e2efe517a54c2f89/content/items/24/nhsbsa_dmd_3.3.0_20250324000001.zip
+2025-03-29 13:50:29 - download - INFO - Download completed: C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\dmd_latest.zip
+2025-03-29 13:50:29 - download - INFO - Extracting C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\dmd_latest.zip to C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw
+2025-03-29 13:50:29 - download - INFO - Extraction completed
+2025-03-29 13:50:29 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 13:50:29 - download - INFO - Found GTIN ZIP file: C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\week132025-r2_3-GTIN.zip
+2025-03-29 13:50:29 - download - INFO - Extracting C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\week132025-r2_3-GTIN.zip to C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw
+2025-03-29 13:50:29 - download - INFO - Extraction completed
+2025-03-29 13:50:29 - download - INFO - Verifying required files
+2025-03-29 13:50:29 - download - INFO - All required file patterns matched
+2025-03-29 13:50:29 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_3200325.xml
+2025-03-29 13:50:29 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_3200325.xml
+2025-03-29 13:50:29 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_3200325.xml
+2025-03-29 13:50:29 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_3200325.xml
+2025-03-29 13:50:29 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_3200325.xml
+2025-03-29 13:50:29 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_0200325.xml
+2025-03-29 13:50:29 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_3200325.xml
+2025-03-29 13:50:29 - download - INFO - Removing ZIP file: C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\dmd_latest.zip
+2025-03-29 13:50:29 - download - INFO - dm+d download process completed successfully

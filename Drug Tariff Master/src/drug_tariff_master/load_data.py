@@ -18,12 +18,12 @@ import logging
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
-from drug_tariff_master.config import DATA_DIR, RAW_DIR, LOGS_DIR
-from drug_tariff_master.utils import setup_logging
+from drug_tariff_master.config import DATA_DIR, RAW_DATA_DIR, LOGS_DIR
+from drug_tariff_master.utils import setup_logger
 
 # Setup logging
 logger = logging.getLogger(__name__)
-setup_logging(LOGS_DIR / "data_loading.log")
+logger = setup_logger(__name__, "data_loading.log")
 
 
 class DataLoader:
@@ -32,7 +32,7 @@ class DataLoader:
     def __init__(self, db_path=None):
         """Initialize with the path to the SQLite database."""
         self.db_path = db_path or DATA_DIR / "dmd.db"
-        self.raw_dir = RAW_DIR
+        self.raw_dir = RAW_DATA_DIR
 
     def load_all_data(self):
         """
