@@ -27,3 +27,192 @@
 2025-03-29 11:24:29 - download - INFO - Verifying required files
 2025-03-29 11:24:29 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
 2025-03-29 11:24:29 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
+2025-03-29 11:26:12 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:26:12 - download - INFO - Download completed: C:\Users\Ciaran\AppData\Local\Temp\tmp_cgf9v3i\test.zip
+2025-03-29 11:26:12 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:26:12 - download - INFO - Verifying required files
+2025-03-29 11:26:12 - download - INFO - All required file patterns matched
+2025-03-29 11:26:12 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_20240101.xml
+2025-03-29 11:26:12 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_20240101.xml
+2025-03-29 11:26:12 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_20240101.xml
+2025-03-29 11:26:12 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_20240101.xml
+2025-03-29 11:26:12 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_20240101.xml
+2025-03-29 11:26:12 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_20240101.xml
+2025-03-29 11:26:12 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_20240101.xml
+2025-03-29 11:26:12 - download - INFO - Verifying required files
+2025-03-29 11:26:12 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
+2025-03-29 11:26:12 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
+2025-03-29 11:26:55 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:26:55 - download - INFO - Download completed: C:\Users\Ciaran\AppData\Local\Temp\tmpj6p6vyb2\test.zip
+2025-03-29 11:26:55 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:26:55 - download - ERROR - Connection error while downloading file: Connection error
+2025-03-29 11:26:55 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:26:55 - download - ERROR - Timeout while downloading file: Timeout error
+2025-03-29 11:26:55 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:26:55 - download - ERROR - HTTP error while downloading file (status code 404): Not Found
+2025-03-29 11:26:55 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpg73cugjg\test.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpg73cugjg\extracted
+2025-03-29 11:26:55 - download - INFO - Extraction completed
+2025-03-29 11:26:55 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmp5dh8remq\invalid.zip to C:\Users\Ciaran\AppData\Local\Temp\tmp5dh8remq\extracted
+2025-03-29 11:26:55 - download - ERROR - Invalid ZIP file: File is not a zip file
+2025-03-29 11:26:55 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmp5dh8remq\nonexistent.zip to C:\Users\Ciaran\AppData\Local\Temp\tmp5dh8remq\extracted
+2025-03-29 11:26:55 - download - ERROR - Error extracting ZIP: [Errno 2] No such file or directory: 'C:\\Users\\Ciaran\\AppData\\Local\\Temp\\tmp5dh8remq\\nonexistent.zip'
+2025-03-29 11:26:55 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 11:26:55 - download - INFO - Found GTIN ZIP file: C:\Users\Ciaran\AppData\Local\Temp\tmpft2wxl5z\f_gtin2_20240101.zip
+2025-03-29 11:26:55 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 11:26:55 - download - WARNING - No GTIN ZIP file found
+2025-03-29 11:26:55 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:26:55 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:26:55 - download - ERROR - No releases found in the API response
+2025-03-29 11:26:55 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:26:55 - download - ERROR - No archive file URL found in the latest release
+2025-03-29 11:26:55 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:26:55 - download - ERROR - Connection error while requesting from TRUD API: Connection error
+2025-03-29 11:26:55 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:26:55 - download - ERROR - Timeout while requesting from TRUD API: Timeout error
+2025-03-29 11:26:55 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:26:55 - download - ERROR - HTTP error from TRUD API (status code 404): Not Found
+2025-03-29 11:26:55 - download - INFO - Verifying required files
+2025-03-29 11:26:55 - download - INFO - All required file patterns matched
+2025-03-29 11:26:55 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_20240101.xml
+2025-03-29 11:26:55 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_20240101.xml
+2025-03-29 11:26:55 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_20240101.xml
+2025-03-29 11:26:55 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_20240101.xml
+2025-03-29 11:26:55 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_20240101.xml
+2025-03-29 11:26:55 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_20240101.xml
+2025-03-29 11:26:55 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_20240101.xml
+2025-03-29 11:26:55 - download - INFO - Verifying required files
+2025-03-29 11:26:55 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
+2025-03-29 11:26:55 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
+2025-03-29 11:28:10 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:28:10 - download - INFO - Download completed: C:\Users\Ciaran\AppData\Local\Temp\tmppvqeunrh\test.zip
+2025-03-29 11:28:10 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:28:10 - download - ERROR - Connection error while downloading file: Connection error
+2025-03-29 11:28:10 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:28:10 - download - ERROR - Timeout while downloading file: Timeout error
+2025-03-29 11:28:10 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:28:10 - download - ERROR - HTTP error while downloading file (status code 404): Not Found
+2025-03-29 11:28:10 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmphinnk7ye\test.zip to C:\Users\Ciaran\AppData\Local\Temp\tmphinnk7ye\extracted
+2025-03-29 11:28:10 - download - INFO - Extraction completed
+2025-03-29 11:28:10 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpx05midqg\invalid.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpx05midqg\extracted
+2025-03-29 11:28:10 - download - ERROR - Invalid ZIP file: File is not a zip file
+2025-03-29 11:28:10 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpx05midqg\nonexistent.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpx05midqg\extracted
+2025-03-29 11:28:10 - download - ERROR - Error extracting ZIP: [Errno 2] No such file or directory: 'C:\\Users\\Ciaran\\AppData\\Local\\Temp\\tmpx05midqg\\nonexistent.zip'
+2025-03-29 11:28:10 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 11:28:10 - download - INFO - Found GTIN ZIP file: C:\Users\Ciaran\AppData\Local\Temp\tmp3a89l0qi\f_gtin2_20240101.zip
+2025-03-29 11:28:10 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 11:28:10 - download - WARNING - No GTIN ZIP file found
+2025-03-29 11:28:10 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:28:10 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:28:10 - download - ERROR - No releases found in the API response
+2025-03-29 11:28:10 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:28:10 - download - ERROR - No archive file URL found in the latest release
+2025-03-29 11:28:10 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:28:10 - download - ERROR - Connection error while requesting from TRUD API: Connection error
+2025-03-29 11:28:10 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:28:10 - download - ERROR - Timeout while requesting from TRUD API: Timeout error
+2025-03-29 11:28:10 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:28:10 - download - ERROR - HTTP error from TRUD API (status code 404): Not Found
+2025-03-29 11:28:10 - download - INFO - Verifying required files
+2025-03-29 11:28:10 - download - INFO - All required file patterns matched
+2025-03-29 11:28:10 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_20240101.xml
+2025-03-29 11:28:10 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_20240101.xml
+2025-03-29 11:28:10 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_20240101.xml
+2025-03-29 11:28:10 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_20240101.xml
+2025-03-29 11:28:10 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_20240101.xml
+2025-03-29 11:28:10 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_20240101.xml
+2025-03-29 11:28:10 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_20240101.xml
+2025-03-29 11:28:10 - download - INFO - Verifying required files
+2025-03-29 11:28:10 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
+2025-03-29 11:28:10 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
+2025-03-29 11:29:13 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:29:13 - download - INFO - Download completed: C:\Users\Ciaran\AppData\Local\Temp\tmppnz5eh3i\test.zip
+2025-03-29 11:29:13 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:29:13 - download - ERROR - Connection error while downloading file: Connection error
+2025-03-29 11:29:13 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:29:13 - download - ERROR - Timeout while downloading file: Timeout error
+2025-03-29 11:29:13 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:29:13 - download - ERROR - HTTP error while downloading file (status code 404): Not Found
+2025-03-29 11:29:13 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmp9t_wvein\test.zip to C:\Users\Ciaran\AppData\Local\Temp\tmp9t_wvein\extracted
+2025-03-29 11:29:13 - download - INFO - Extraction completed
+2025-03-29 11:29:13 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpy0057s_m\invalid.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpy0057s_m\extracted
+2025-03-29 11:29:13 - download - ERROR - Invalid ZIP file: File is not a zip file
+2025-03-29 11:29:13 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpy0057s_m\nonexistent.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpy0057s_m\extracted
+2025-03-29 11:29:13 - download - ERROR - Error extracting ZIP: [Errno 2] No such file or directory: 'C:\\Users\\Ciaran\\AppData\\Local\\Temp\\tmpy0057s_m\\nonexistent.zip'
+2025-03-29 11:29:13 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 11:29:13 - download - INFO - Found GTIN ZIP file: C:\Users\Ciaran\AppData\Local\Temp\tmpx5p6ps7y\f_gtin2_20240101.zip
+2025-03-29 11:29:13 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 11:29:13 - download - WARNING - No GTIN ZIP file found
+2025-03-29 11:29:13 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:29:13 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:29:13 - download - ERROR - No releases found in the API response
+2025-03-29 11:29:13 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:29:13 - download - ERROR - No archive file URL found in the latest release
+2025-03-29 11:29:13 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:29:13 - download - ERROR - Connection error while requesting from TRUD API: Connection error
+2025-03-29 11:29:13 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:29:13 - download - ERROR - Timeout while requesting from TRUD API: Timeout error
+2025-03-29 11:29:13 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:29:13 - download - ERROR - HTTP error from TRUD API (status code 404): Not Found
+2025-03-29 11:29:13 - download - INFO - Starting dm+d download process
+2025-03-29 11:29:13 - download - ERROR - An unexpected error occurred: expected str, bytes or os.PathLike object, not PropertyMock
+2025-03-29 11:29:13 - download - INFO - Starting dm+d download process
+2025-03-29 11:29:13 - download - ERROR - An unexpected error occurred: expected str, bytes or os.PathLike object, not PropertyMock
+2025-03-29 11:29:13 - download - INFO - Starting dm+d download process
+2025-03-29 11:29:13 - download - ERROR - Failed to get latest release URL
+2025-03-29 11:29:13 - download - INFO - Starting dm+d download process
+2025-03-29 11:29:13 - download - ERROR - An unexpected error occurred: unsupported operand type(s) for /: 'PropertyMock' and 'str'
+2025-03-29 11:29:13 - download - INFO - Starting dm+d download process
+2025-03-29 11:29:13 - download - ERROR - An unexpected error occurred: expected str, bytes or os.PathLike object, not PropertyMock
+2025-03-29 11:29:13 - download - INFO - Verifying required files
+2025-03-29 11:29:13 - download - INFO - All required file patterns matched
+2025-03-29 11:29:13 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_20240101.xml
+2025-03-29 11:29:13 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_20240101.xml
+2025-03-29 11:29:13 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_20240101.xml
+2025-03-29 11:29:13 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_20240101.xml
+2025-03-29 11:29:13 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_20240101.xml
+2025-03-29 11:29:13 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_20240101.xml
+2025-03-29 11:29:13 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_20240101.xml
+2025-03-29 11:29:13 - download - INFO - Verifying required files
+2025-03-29 11:29:13 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
+2025-03-29 11:29:13 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
+2025-03-29 11:30:01 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:30:01 - download - INFO - Download completed: C:\Users\Ciaran\AppData\Local\Temp\tmpizfautxq\test.zip
+2025-03-29 11:30:01 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:30:01 - download - ERROR - Connection error while downloading file: Connection error
+2025-03-29 11:30:01 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:30:01 - download - ERROR - Timeout while downloading file: Timeout error
+2025-03-29 11:30:01 - download - INFO - Downloading file from https://example.com/test.zip
+2025-03-29 11:30:01 - download - ERROR - HTTP error while downloading file (status code 404): Not Found
+2025-03-29 11:30:01 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpaa0pgj4u\test.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpaa0pgj4u\extracted
+2025-03-29 11:30:01 - download - INFO - Extraction completed
+2025-03-29 11:30:01 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpmub4e2ov\invalid.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpmub4e2ov\extracted
+2025-03-29 11:30:01 - download - ERROR - Invalid ZIP file: File is not a zip file
+2025-03-29 11:30:01 - download - INFO - Extracting C:\Users\Ciaran\AppData\Local\Temp\tmpmub4e2ov\nonexistent.zip to C:\Users\Ciaran\AppData\Local\Temp\tmpmub4e2ov\extracted
+2025-03-29 11:30:01 - download - ERROR - Error extracting ZIP: [Errno 2] No such file or directory: 'C:\\Users\\Ciaran\\AppData\\Local\\Temp\\tmpmub4e2ov\\nonexistent.zip'
+2025-03-29 11:30:01 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 11:30:01 - download - INFO - Found GTIN ZIP file: C:\Users\Ciaran\AppData\Local\Temp\tmpv4ahhnjq\f_gtin2_20240101.zip
+2025-03-29 11:30:01 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 11:30:01 - download - WARNING - No GTIN ZIP file found
+2025-03-29 11:30:01 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:30:01 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:30:01 - download - ERROR - No releases found in the API response
+2025-03-29 11:30:01 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:30:01 - download - ERROR - No archive file URL found in the latest release
+2025-03-29 11:30:01 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:30:01 - download - ERROR - Connection error while requesting from TRUD API: Connection error
+2025-03-29 11:30:01 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:30:01 - download - ERROR - Timeout while requesting from TRUD API: Timeout error
+2025-03-29 11:30:01 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 11:30:01 - download - ERROR - HTTP error from TRUD API (status code 404): Not Found
+2025-03-29 11:30:01 - download - INFO - Verifying required files
+2025-03-29 11:30:01 - download - INFO - All required file patterns matched
+2025-03-29 11:30:01 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_20240101.xml
+2025-03-29 11:30:01 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_20240101.xml
+2025-03-29 11:30:01 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_20240101.xml
+2025-03-29 11:30:01 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_20240101.xml
+2025-03-29 11:30:01 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_20240101.xml
+2025-03-29 11:30:01 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_20240101.xml
+2025-03-29 11:30:01 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_20240101.xml
+2025-03-29 11:30:01 - download - INFO - Verifying required files
+2025-03-29 11:30:01 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
+2025-03-29 11:30:01 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
