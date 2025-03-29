@@ -18,6 +18,7 @@ import logging
 import re
 from pathlib import Path
 import xml.etree.ElementTree as ET
+from lxml import etree
 
 from drug_tariff_master.config import DATA_DIR, RAW_DATA_DIR, LOGS_DIR, REQUIRED_FILE_PATTERNS
 from drug_tariff_master.utils import setup_logger
@@ -398,6 +399,51 @@ class DataLoader:
                 logger.error(f"Error counting rows in table {table_name}: {e}")
         
         logger.info(f"Total rows loaded across relevant tables: {total_rows}")
+
+    def _validate_xml(self, xml_path, xsd_path):
+        """
+        Validate an XML file against its corresponding XSD schema.
+        
+        This validation ensures the XML file conforms to the expected structure
+        before attempting to parse and load it.
+        
+        Args:
+            xml_path: A pathlib.Path object to the XML file.
+            xsd_path: A pathlib.Path object to the corresponding XSD file.
+            
+        Returns:
+            bool: True if validation passes or is skipped, False if validation fails.
+        """
+        # Check if XSD path exists
+        if not xsd_path.exists():
+            logger.warning(f"XSD schema not found at {xsd_path}, skipping validation for {xml_path.name}")
+            return True
+            
+        try:
+            # Parse the XSD schema
+            xmlschema_doc = etree.parse(str(xsd_path))
+            
+            # Create a schema object
+            xmlschema = etree.XMLSchema(xmlschema_doc)
+            
+            # Parse the XML document
+            xml_doc = etree.parse(str(xml_path))
+            
+            # Validate the XML against the schema
+            is_valid = xmlschema.validate(xml_doc)
+            
+            if not is_valid:
+                # Log validation errors
+                logger.error(f"XML validation failed for {xml_path.name} against {xsd_path.name}:\n{xmlschema.error_log}")
+                return False
+            else:
+                logger.info(f"XML validation successful for {xml_path.name}")
+                return True
+                
+        except Exception as e:
+            # Log any errors during the validation process
+            logger.error(f"Error during XML validation for {xml_path.name}: {e}")
+            return False
 
 
 def main():
