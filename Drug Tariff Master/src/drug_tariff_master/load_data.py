@@ -114,6 +114,9 @@ class DataLoader:
                 gtin_file = file_mapping[r"f_gtin2_\d+\.xml"]
                 self._load_gtin_data(conn, gtin_file)
                 
+                # Report final counts
+                self._report_table_counts(conn)
+                
                 logger.info("All data loaded successfully")
                 return True
                 
@@ -304,6 +307,97 @@ class DataLoader:
         # Commit is not done here as this method should be part of a larger transaction
         
         logger.info("Finished clearing existing data.")
+
+    def _report_table_counts(self, conn):
+        """
+        Query and log the number of rows in each relevant table.
+        
+        This serves as a basic validation and summary after the data loading process.
+        
+        Args:
+            conn: The active sqlite3.Connection object.
+        """
+        logger.info("Reporting final table counts...")
+        
+        cursor = conn.cursor()
+        
+        # Use the same table list as in _clear_existing_data but order doesn't matter for counting
+        all_dmd_tables = [
+            # AMPP detail/linking tables
+            "ampp_gtin",
+            "ampp_combination_content",
+            "ampp_reimbursement_info",
+            "ampp_price_info",
+            "ampp_prescribing_info",
+            "ampp_appliance_pack_info",
+            "ampp",
+            
+            # VMPP detail/linking tables
+            "vmpp_combination_content",
+            "vmpp_drug_tariff_info",
+            "vmpp",
+            
+            # AMP detail/linking tables
+            "amp_information",
+            "amp_licensed_route",
+            "amp_ingredient",
+            "amp",
+            
+            # VMP detail/linking tables
+            "vmp_control_drug_info",
+            "vmp_drug_route",
+            "vmp_drug_form",
+            "vmp_ontology_form_route",
+            "vmp_ingredient",
+            "vmp",
+            
+            # VTM tables
+            "vtm",
+            
+            # Ingredient tables
+            "ingredient",
+            
+            # Lookup tables
+            "lookup_licensing_authority_change_reason",
+            "lookup_availability_restriction",
+            "lookup_legal_category",
+            "lookup_price_basis",
+            "lookup_df_indicator",
+            "lookup_discontinued_indicator",
+            "lookup_virtual_product_non_avail",
+            "lookup_dnd",
+            "lookup_special_container",
+            "lookup_reimbursement_status",
+            "lookup_basis_of_strength",
+            "lookup_colour",
+            "lookup_flavour",
+            "lookup_supplier",
+            "lookup_drug_tariff_payment_category",
+            "lookup_route",
+            "lookup_ontology_form_route",
+            "lookup_form",
+            "lookup_unit_of_measure",
+            "lookup_licensing_authority",
+            "lookup_control_drug_category",
+            "lookup_virtual_product_pres_status",
+            "lookup_name_change_reason",
+            "lookup_basis_of_name",
+            "lookup_combination_product_indicator",
+            "lookup_combination_pack_indicator"
+        ]
+        
+        total_rows = 0
+        
+        for table_name in all_dmd_tables:
+            try:
+                cursor.execute(f"SELECT COUNT(*) FROM {table_name};")
+                count = cursor.fetchone()[0]
+                logger.info(f"Table '{table_name}': {count} rows")
+                total_rows += count
+            except sqlite3.Error as e:
+                logger.error(f"Error counting rows in table {table_name}: {e}")
+        
+        logger.info(f"Total rows loaded across relevant tables: {total_rows}")
 
 
 def main():
