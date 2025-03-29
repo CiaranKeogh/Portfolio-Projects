@@ -159,6 +159,57 @@ class DataLoader:
         """Load GTIN data from GTIN XML file."""
         logger.info(f"Loading GTIN data from {file_path.name}")
         # TODO: Implement loading of GTIN data from XML
+        
+    def _execute_batch(self, conn, sql, batch_data):
+        """
+        Execute a batch insert operation with error handling.
+        
+        This method attempts to insert multiple rows at once for efficiency.
+        If a batch operation fails (e.g., due to integrity constraints),
+        it falls back to inserting records individually to maximize data loading.
+        
+        Args:
+            conn: The active sqlite3.Connection object.
+            sql: The parameterized INSERT SQL statement.
+            batch_data: A list of tuples, where each tuple represents a row.
+            
+        Returns:
+            int: Number of rows successfully inserted.
+        """
+        # If batch is empty, return 0 (no rows processed)
+        if not batch_data:
+            return 0
+            
+        # Get a database cursor
+        cursor = conn.cursor()
+        
+        try:
+            # Attempt batch insert
+            cursor.executemany(sql, batch_data)
+            logger.debug(f"Batch inserted {len(batch_data)} rows using: {sql[:50]}...")
+            return len(batch_data)
+            
+        except sqlite3.IntegrityError as e:
+            # Handle integrity errors (like constraint violations, duplicate keys)
+            logger.warning(f"Batch insert failed ({e}). Falling back to individual inserts for {len(batch_data)} records.")
+            
+            # Fall back to individual inserts
+            inserted_count = 0
+            for record in batch_data:
+                try:
+                    cursor.execute(sql, record)
+                    inserted_count += 1
+                except sqlite3.Error as inner_e:
+                    logger.error(f"Failed to insert record {record}: {inner_e}")
+                    # Continue to next record, don't stop the process
+            
+            logger.warning(f"Inserted {inserted_count} rows individually after batch failure.")
+            return inserted_count
+            
+        except sqlite3.Error as e:
+            # Handle other SQLite errors during batch attempt
+            logger.error(f"Batch insert failed with SQLite error: {e}")
+            return 0
 
 
 def main():
