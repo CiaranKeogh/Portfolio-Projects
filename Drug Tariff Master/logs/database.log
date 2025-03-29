@@ -9,3 +9,14 @@
 2025-03-29 13:50:20 - drug_tariff_master.setup_database - INFO - Creating AMPP tables
 2025-03-29 13:50:20 - drug_tariff_master.setup_database - INFO - Creating indexes
 2025-03-29 13:50:20 - drug_tariff_master.setup_database - INFO - Database setup completed successfully
+2025-03-29 15:24:22 - drug_tariff_master.setup_database - INFO - Setting up database at C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\dmd.db
+2025-03-29 15:24:22 - drug_tariff_master.setup_database - INFO - Dropping existing tables
+2025-03-29 15:24:22 - drug_tariff_master.setup_database - INFO - Creating lookup tables
+2025-03-29 15:24:23 - drug_tariff_master.setup_database - INFO - Creating ingredient table
+2025-03-29 15:24:23 - drug_tariff_master.setup_database - INFO - Creating VTM table
+2025-03-29 15:24:23 - drug_tariff_master.setup_database - INFO - Creating VMP tables
+2025-03-29 15:24:23 - drug_tariff_master.setup_database - INFO - Creating AMP tables
+2025-03-29 15:24:23 - drug_tariff_master.setup_database - INFO - Creating VMPP tables
+2025-03-29 15:24:23 - drug_tariff_master.setup_database - INFO - Creating AMPP tables
+2025-03-29 15:24:23 - drug_tariff_master.setup_database - INFO - Creating indexes
+2025-03-29 15:24:23 - drug_tariff_master.setup_database - INFO - Database setup completed successfully

@@ -50,6 +50,8 @@ data/raw/*
 *.doc
 
 # Logs
+logs/
+C:/Users/Ciaran/Documents/Portfolio-Projects/Portfolio-Projects/Drug Tariff Master/logs/
 src/drug_tariff_master/logs/*.log
 
 # IDE files

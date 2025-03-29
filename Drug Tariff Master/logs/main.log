@@ -6,3 +6,6 @@
 2025-03-29 14:59:22 - main - INFO - Running load command
 2025-03-29 15:00:08 - main - INFO - Running load command
 2025-03-29 15:16:44 - main - INFO - Running download command
+2025-03-29 15:24:19 - main - ERROR - Unknown command: None
+2025-03-29 15:24:22 - main - INFO - Running setup-db command
+2025-03-29 15:24:53 - main - INFO - Running load command

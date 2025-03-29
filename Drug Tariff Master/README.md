@@ -39,7 +39,7 @@ Drug Tariff Master/
 - Logs progress and errors
 - Provides visual progress bars for downloads, extraction, and verification
 
-### Phase 2: Database Schema Definition (Upcoming)
+### Phase 2: Database Schema Definition (Implemented)
 - Creates SQLite database with tables corresponding to XML structures
 - Defines and enforces Primary Key (PK) and Foreign Key (FK) relationships
 - Implements appropriate constraints
@@ -107,6 +107,8 @@ dmd [command]
 
 Available commands:
 - `download`: Download dm+d files from TRUD API
+- `setup-db`: Set up the SQLite database schema
+- `load`: Load downloaded data into the database
 
 Example:
 ```
@@ -118,10 +120,10 @@ dmd download
 You can also use the package in your Python code:
 
 ```python
-from drug_tariff_master import download_dmd
+from drug_tariff_master import download
 
 # Download dm+d files
-result = download_dmd.main()
+result = download.main()
 ```
 
 ### Running as a Module
@@ -178,7 +180,7 @@ The dates in the filenames are automatically handled by the application using pa
 The project follows a strict implementation plan to ensure data integrity and efficient processing:
 
 1. **Download Handling**: Gets required files (f_vtm2_*.xml, f_vmp2_*.xml, f_vmpp2_*.xml, f_amp2_*.xml, f_ampp2_*.xml, f_gtin2_*.xml, f_lookup2_*.xml)
-2. **Database Creation**: Sets up an SQLite database with tables corresponding to XML structures
+2. **Database Creation**: Sets up an SQLite database with tables corresponding to XML structures in the `data/` directory
 3. **Relationship Implementation**: Defines and enforces PK and FK relationships between tables
 4. **Data Parsing & Loading**: Reads XML files and inserts data into database tables
 5. **Lookup Integration**: Populates descriptive fields by joining main data tables with lookup tables
@@ -188,7 +190,7 @@ The project follows a strict implementation plan to ensure data integrity and ef
 ## Development Status
 
 - [x] Phase 1: Download Mechanism
-- [ ] Phase 2: Database Schema Definition
+- [x] Phase 2: Database Schema Definition
 - [ ] Phase 3: Data Parsing & Loading
 - [ ] Phase 4: Search Data Preparation
 - [ ] Phase 5: Basic Search Implementation 
