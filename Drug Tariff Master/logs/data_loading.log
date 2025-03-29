@@ -1,0 +1,12 @@
+2025-03-29 14:59:22 - drug_tariff_master.load_data - INFO - Starting data loading process
+2025-03-29 14:59:22 - drug_tariff_master.load_data - ERROR - Required XML files not found: f_lookup2_3.xml, f_vtm2_3.xml, f_vmp2_3.xml, f_amp2_3.xml, f_vmpp2_3.xml, f_ampp2_3.xml, f_gtin2_0.xml
+2025-03-29 14:59:22 - drug_tariff_master.load_data - ERROR - Run download_dmd.py first to get the required files.
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - Starting data loading process
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - Loading lookup data from f_lookup2_3200325.xml
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - Loading VTM data from f_vtm2_3200325.xml
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - Loading VMP data from f_vmp2_3200325.xml
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - Loading AMP data from f_amp2_3200325.xml
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - Loading VMPP data from f_vmpp2_3200325.xml
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - Loading AMPP data from f_ampp2_3200325.xml
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - Loading GTIN data from f_gtin2_0200325.xml
+2025-03-29 15:00:08 - drug_tariff_master.load_data - INFO - All data loaded successfully
