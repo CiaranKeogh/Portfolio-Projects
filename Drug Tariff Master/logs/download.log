@@ -185,3 +185,24 @@
 2025-03-29 15:00:13 - download - INFO - Verifying required files
 2025-03-29 15:00:13 - download - WARNING - No file matching pattern 'f_vtm2_\d+\.xml' found
 2025-03-29 15:00:13 - download - ERROR - Missing required file patterns: f_vtm2_\d+\.xml
+2025-03-29 15:16:44 - download - INFO - Starting dm+d download process
+2025-03-29 15:16:44 - download - INFO - Requesting latest release information from TRUD API
+2025-03-29 15:16:44 - download - INFO - Downloading file from https://isd.digital.nhs.uk/download/api/v1/keys/86ead0de139d8018be1e1457e2efe517a54c2f89/content/items/24/nhsbsa_dmd_3.3.0_20250324000001.zip
+2025-03-29 15:16:46 - download - INFO - Download completed: C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\dmd_latest.zip
+2025-03-29 15:16:46 - download - INFO - Extracting C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\dmd_latest.zip to C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw
+2025-03-29 15:16:46 - download - INFO - Extraction completed
+2025-03-29 15:16:46 - download - INFO - Searching for GTIN ZIP file
+2025-03-29 15:16:46 - download - INFO - Found GTIN ZIP file: C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\week132025-r2_3-GTIN.zip
+2025-03-29 15:16:46 - download - INFO - Extracting C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\week132025-r2_3-GTIN.zip to C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw
+2025-03-29 15:16:46 - download - INFO - Extraction completed
+2025-03-29 15:16:46 - download - INFO - Verifying required files
+2025-03-29 15:16:46 - download - INFO - All required file patterns matched
+2025-03-29 15:16:46 - download - INFO - Matched: f_vtm2_\d+\.xml -> f_vtm2_3200325.xml
+2025-03-29 15:16:46 - download - INFO - Matched: f_vmp2_\d+\.xml -> f_vmp2_3200325.xml
+2025-03-29 15:16:46 - download - INFO - Matched: f_vmpp2_\d+\.xml -> f_vmpp2_3200325.xml
+2025-03-29 15:16:46 - download - INFO - Matched: f_amp2_\d+\.xml -> f_amp2_3200325.xml
+2025-03-29 15:16:46 - download - INFO - Matched: f_ampp2_\d+\.xml -> f_ampp2_3200325.xml
+2025-03-29 15:16:46 - download - INFO - Matched: f_gtin2_\d+\.xml -> f_gtin2_0200325.xml
+2025-03-29 15:16:46 - download - INFO - Matched: f_lookup2_\d+\.xml -> f_lookup2_3200325.xml
+2025-03-29 15:16:46 - download - INFO - Removing ZIP file: C:\Users\Ciaran\Documents\Portfolio-Projects\Portfolio-Projects\Drug Tariff Master\data\raw\dmd_latest.zip
+2025-03-29 15:16:46 - download - INFO - dm+d download process completed successfully

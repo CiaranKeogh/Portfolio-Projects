@@ -8,7 +8,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from drug_tariff_master import download_dmd
+from drug_tariff_master import download
 from drug_tariff_master import setup_database
 from drug_tariff_master import load_data
 from drug_tariff_master.utils import setup_logger
@@ -48,7 +48,7 @@ def main():
     
     if args.command == "download":
         logger.info("Running download command")
-        return download_dmd.main()
+        return download.main()
     elif args.command == "setup-db":
         logger.info("Running setup-db command")
         return setup_database.main()
