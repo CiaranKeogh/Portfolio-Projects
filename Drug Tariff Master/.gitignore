@@ -63,3 +63,6 @@ Thumbs.db
 
 # C extensions
 *.so 
+
+# Product Insight directory
+Product Insight/ 
