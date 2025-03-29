@@ -49,6 +49,12 @@ class DataLoader:
         6. VMPP (f_vmpp2.xml)
         7. AMPP (f_ampp2.xml)
         8. GTIN (f_gtin2.xml)
+        
+        Args:
+            clear_existing: Whether to clear existing data before loading.
+            
+        Returns:
+            bool: True if loading completed successfully, False otherwise.
         """
         logger.info("Starting data loading process")
         
@@ -78,55 +84,99 @@ class DataLoader:
             logger.error("Run download_dmd.py first to get the required files.")
             return False
         
-        # Load data
+        # Define specific patterns for each file type
+        lookup_pattern = r"f_lookup2_\d+\.xml"
+        ingredient_pattern = r"f_ingredient2_\d+\.xml"
+        vtm_pattern = r"f_vtm2_\d+\.xml"
+        vmp_pattern = r"f_vmp2_\d+\.xml"
+        amp_pattern = r"f_amp2_\d+\.xml"
+        vmpp_pattern = r"f_vmpp2_\d+\.xml"
+        ampp_pattern = r"f_ampp2_\d+\.xml"
+        gtin_pattern = r"f_gtin2_\d+\.xml"
+        
+        # Initialize connection variable
+        conn = None
+        
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                # Enable foreign keys
-                conn.execute("PRAGMA foreign_keys = ON")
-                
-                # Clear existing data if requested
-                if clear_existing:
-                    self._clear_existing_data(conn)
-                
-                # Load in order
-                lookup_file = file_mapping[r"f_lookup2_\d+\.xml"]
-                self._load_lookup_data(conn, lookup_file)
-                
-                # Load ingredient data if available
-                ingredient_pattern = r"f_ingredient2_\d+\.xml"
-                if ingredient_pattern in file_mapping:
-                    self._load_ingredient_data(conn, file_mapping[ingredient_pattern])
-                
-                vtm_file = file_mapping[r"f_vtm2_\d+\.xml"]
-                self._load_vtm_data(conn, vtm_file)
-                
-                vmp_file = file_mapping[r"f_vmp2_\d+\.xml"]
-                self._load_vmp_data(conn, vmp_file)
-                
-                amp_file = file_mapping[r"f_amp2_\d+\.xml"]
-                self._load_amp_data(conn, amp_file)
-                
-                vmpp_file = file_mapping[r"f_vmpp2_\d+\.xml"]
-                self._load_vmpp_data(conn, vmpp_file)
-                
-                ampp_file = file_mapping[r"f_ampp2_\d+\.xml"]
-                self._load_ampp_data(conn, ampp_file)
-                
-                gtin_file = file_mapping[r"f_gtin2_\d+\.xml"]
-                self._load_gtin_data(conn, gtin_file)
-                
-                # Report final counts
-                self._report_table_counts(conn)
-                
-                logger.info("All data loaded successfully")
-                return True
-                
-        except sqlite3.Error as e:
-            logger.error(f"SQLite error during data loading: {e}")
+            # Establish database connection
+            conn = sqlite3.connect(self.db_path)
+            
+            # Enable foreign keys
+            conn.execute("PRAGMA foreign_keys = ON;")
+            
+            # Begin transaction
+            conn.execute("BEGIN TRANSACTION;")
+            logger.info("Database transaction started")
+            
+            # Clear existing data if requested
+            if clear_existing:
+                self._clear_existing_data(conn)
+            
+            # Optional validation of XML files against schemas
+            schemas_dir = Path(__file__).resolve().parent.parent.parent / "schemas"
+            
+            # Map of XML patterns to their schema files
+            schema_mapping = {
+                lookup_pattern: schemas_dir / "lookup_schema.xsd",
+                vtm_pattern: schemas_dir / "vtm_schema.xsd",
+                vmp_pattern: schemas_dir / "vmp_schema.xsd",
+                amp_pattern: schemas_dir / "amp_schema.xsd",
+                vmpp_pattern: schemas_dir / "vmpp_schema.xsd",
+                ampp_pattern: schemas_dir / "ampp_schema.xsd",
+                gtin_pattern: schemas_dir / "gtin_schema.xsd"
+            }
+            
+            # Validate XML files if schemas exist
+            for pattern, xml_path in file_mapping.items():
+                if pattern in schema_mapping:
+                    xsd_path = schema_mapping[pattern]
+                    if not self._validate_xml(xml_path, xsd_path):
+                        logger.error(f"XML validation failed for {xml_path}. Aborting data loading.")
+                        conn.rollback()
+                        return False
+            
+            # Load data in the correct order
+            self._load_lookup_data(conn, file_mapping[lookup_pattern])
+            
+            # Load ingredient data if available
+            if ingredient_pattern in file_mapping:
+                self._load_ingredient_data(conn, file_mapping[ingredient_pattern])
+            
+            self._load_vtm_data(conn, file_mapping[vtm_pattern])
+            self._load_vmp_data(conn, file_mapping[vmp_pattern])
+            self._load_amp_data(conn, file_mapping[amp_pattern])
+            self._load_vmpp_data(conn, file_mapping[vmpp_pattern])
+            self._load_ampp_data(conn, file_mapping[ampp_pattern])
+            self._load_gtin_data(conn, file_mapping[gtin_pattern])
+            
+            # Commit transaction
+            conn.commit()
+            logger.info("Database transaction committed successfully")
+            
+            # Report final counts
+            self._report_table_counts(conn)
+            
+            logger.info("All data loaded successfully")
+            return True
+            
+        except sqlite3.Error as db_err:
+            logger.error(f"Database error occurred during loading: {db_err}")
+            if conn:
+                conn.rollback()
+                logger.warning("Transaction rolled back due to database error")
             return False
-        except Exception as e:
-            logger.error(f"Unexpected error during data loading: {e}")
+            
+        except Exception as general_err:
+            logger.exception(f"An unexpected error occurred during data loading: {general_err}")
+            if conn:
+                conn.rollback()
+                logger.warning("Transaction rolled back due to unexpected error")
             return False
+            
+        finally:
+            if conn:
+                conn.close()
+                logger.info("Database connection closed")
 
     def _load_lookup_data(self, conn, file_path):
         """Load lookup data from lookup XML file."""
