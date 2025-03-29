@@ -2,18 +2,40 @@
 .env
 .env.*
 !.env.example
+.venv
+env/
+venv/
+ENV/
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
-env/
-.pytest_cache/
 *.egg-info/
 dist/
 build/
 .eggs/
+develop-eggs/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Data files
 data/raw/*
@@ -28,7 +50,7 @@ data/raw/*
 *.doc
 
 # Logs
-logs/*.log
+src/drug_tariff_master/logs/*.log
 
 # IDE files
 .vscode/
@@ -37,4 +59,7 @@ logs/*.log
 
 # OS specific
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# C extensions
+*.so 

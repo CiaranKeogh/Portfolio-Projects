@@ -13,12 +13,12 @@ Drug Tariff Master/
 │       ├── download_dmd.py # Download mechanism for dm+d files
 │       ├── config.py       # Configuration settings
 │       ├── utils.py        # Utility functions (logging, etc.)
+│       ├── logs/           # Log files (automatically managed)
 ├── tests/                  # Test scripts
 │   ├── unit/               # Unit tests
 │       ├── test_download.py# Tests for download mechanism
 ├── data/                   # Data files
 │   ├── raw/                # Raw XML files downloaded from TRUD
-├── logs/                   # Log files
 ├── schemas/                # XSD schema files
 ├── .env                    # Environment variables (API keys, etc.)
 ├── .env.example            # Example environment variables file
