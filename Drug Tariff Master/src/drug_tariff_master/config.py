@@ -17,7 +17,7 @@ LOGS_DIR = BASE_DIR / "logs"
 SCHEMAS_DIR = BASE_DIR / "schemas"
 
 # Database settings
-DATABASE_FILE = BASE_DIR / "dmd.db"
+DATABASE_FILE = DATA_DIR / "dmd.db"
 
 # TRUD API settings
 TRUD_API_KEY = os.getenv("TRUD_API_KEY")
